@@ -1,0 +1,15 @@
+export const Categories: string[] = [
+  'Electronics',
+  'Sports',
+  'Fitness',
+  'Office',
+  'Footwear',
+  'Kitchen',
+  'Gaming',
+  'Fashion',
+  'Home Decor',
+  'Beauty',
+  'Health',
+  'Outdoor',
+  'Home Appliances',
+]
