@@ -30,34 +30,36 @@ const submit = () => {}
 </script>
 
 <template>
-  <el-dialog v-model="dialogVisible" class="modern-dialog">
-    <div class="form-container">
-      <el-form @submit.prevent="submit">
-        <el-form-item label="FIRST NAME" class="form-field">
-          <el-input v-model="form.firstName" type="firstName" clearable />
-        </el-form-item>
-        <el-form-item label="LAST NAME" class="form-field"
-          ><el-input v-model="form.lastName" type="lastName" clearable
-        /></el-form-item>
-        <el-form-item label="PHONE NUMBER" class="form-field"
-          ><el-input v-model="form.phone" type="phone" clearable
-        /></el-form-item>
-        <el-form-item label="STREET" class="form-field"
-          ><el-input v-model="form.street" type="street" clearable
-        /></el-form-item>
-        <el-form-item label="CITY" class="form-field"
-          ><el-input v-model="form.city" type="city" clearable
-        /></el-form-item>
-        <el-form-item label="COUNTRY" class="form-field"
-          ><el-input v-model="form.country" type="country" clearable
-        /></el-form-item>
-        <el-form-item label="POSTAL CODE" class="form-field"
-          ><el-input v-model="form.postalCode" type="postalCode" clearable
-        /></el-form-item>
-        <el-button type="primary" size="default" @click="submit"></el-button>
-      </el-form>
-    </div>
-  </el-dialog>
+  <section id="edit">
+    <el-dialog v-model="dialogVisible" class="modern-dialog">
+      <div class="form-container">
+        <el-form @submit.prevent="submit">
+          <el-form-item label="FIRST NAME" class="form-field">
+            <el-input v-model="form.firstName" type="firstName" clearable />
+          </el-form-item>
+          <el-form-item label="LAST NAME" class="form-field"
+            ><el-input v-model="form.lastName" type="lastName" clearable
+          /></el-form-item>
+          <el-form-item label="PHONE NUMBER" class="form-field"
+            ><el-input v-model="form.phone" type="phone" clearable
+          /></el-form-item>
+          <el-form-item label="STREET" class="form-field"
+            ><el-input v-model="form.street" type="street" clearable
+          /></el-form-item>
+          <el-form-item label="CITY" class="form-field"
+            ><el-input v-model="form.city" type="city" clearable
+          /></el-form-item>
+          <el-form-item label="COUNTRY" class="form-field"
+            ><el-input v-model="form.country" type="country" clearable
+          /></el-form-item>
+          <el-form-item label="POSTAL CODE" class="form-field"
+            ><el-input v-model="form.postalCode" type="postalCode" clearable
+          /></el-form-item>
+          <el-button type="primary" size="default" @click="submit"></el-button>
+        </el-form>
+      </div>
+    </el-dialog>
+  </section>
 </template>
 
 <style lang="css" scoped>
