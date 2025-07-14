@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { useAuthStore } from '@/stores/AuthStore'
-import { reactive, ref, watch } from 'vue'
+import { ElMessage } from 'element-plus'
+import { reactive, ref, watch, watchEffect } from 'vue'
 
 const props = defineProps<{
   visible: boolean
@@ -19,43 +20,125 @@ watch(dialogVisible, (v) => emit('update:visible', v))
 const form = reactive({
   firstName: '',
   lastName: '',
-  phone: 0,
+  phone: '',
   street: '',
   city: '',
   country: '',
-  postalCode: 0,
+  postalCode: '',
 })
 
-const submit = () => {}
+const submit = () => {
+  try {
+    authStore.updateProfile({
+      firstName: form.firstName,
+      lastName: form.lastName,
+      phone: Number(form.phone),
+      address: {
+        street: form.street,
+        city: form.city,
+        postalCode: Number(form.postalCode),
+        country: form.country,
+      },
+    })
+    ElMessage.success('Credentials Added!')
+    dialogVisible.value = false
+  } catch {
+    ElMessage.error('Something went wrong!')
+  }
+}
+
+watchEffect(() => {
+  const user = authStore.currentUser
+  if (!user) return
+  form.firstName = user.firstName || ''
+  form.lastName = user.lastName || ''
+  form.phone = user.phone?.toString() || ''
+  form.street = user.address?.street || ''
+  form.city = user.address?.city || ''
+  form.country = user.address?.country || ''
+  form.postalCode = user.address?.postalCode?.toString() || ''
+})
 </script>
 
 <template>
   <section id="edit">
-    <el-dialog v-model="dialogVisible" class="modern-dialog">
+    <el-dialog v-model="dialogVisible" width="420px" align-center class="modern-dialog">
       <div class="form-container">
-        <el-form @submit.prevent="submit">
-          <el-form-item label="FIRST NAME" class="form-field">
-            <el-input v-model="form.firstName" type="firstName" clearable />
+        <el-form @submit.prevent="submit" class="modern-form">
+          <el-form-item class="form-field">
+            <label class="field-label">First Name</label>
+            <el-input
+              v-model="form.firstName"
+              type="firstName"
+              placeholder="Enter your first name"
+              class="modern-input"
+              clearable
+            />
           </el-form-item>
-          <el-form-item label="LAST NAME" class="form-field"
-            ><el-input v-model="form.lastName" type="lastName" clearable
-          /></el-form-item>
-          <el-form-item label="PHONE NUMBER" class="form-field"
-            ><el-input v-model="form.phone" type="phone" clearable
-          /></el-form-item>
-          <el-form-item label="STREET" class="form-field"
-            ><el-input v-model="form.street" type="street" clearable
-          /></el-form-item>
-          <el-form-item label="CITY" class="form-field"
-            ><el-input v-model="form.city" type="city" clearable
-          /></el-form-item>
-          <el-form-item label="COUNTRY" class="form-field"
-            ><el-input v-model="form.country" type="country" clearable
-          /></el-form-item>
-          <el-form-item label="POSTAL CODE" class="form-field"
-            ><el-input v-model="form.postalCode" type="postalCode" clearable
-          /></el-form-item>
-          <el-button type="primary" size="default" @click="submit"></el-button>
+
+          <el-form-item class="form-field">
+            <label class="field-label">Last Name</label>
+            <el-input
+              v-model="form.lastName"
+              type="lastName"
+              placeholder="Enter your last name"
+              class="modern-input"
+            />
+          </el-form-item>
+
+          <el-form-item class="form-field">
+            <label class="field-label">Phone Number</label>
+            <el-input
+              v-model="form.phone"
+              type="phone"
+              placeholder="Enter your phone number"
+              class="modern-input"
+            />
+          </el-form-item>
+
+          <el-form-item class="form-field">
+            <label class="field-label">Street</label>
+            <el-input
+              v-model="form.street"
+              type="street"
+              placeholder="Enter your street"
+              class="modern-input"
+            />
+          </el-form-item>
+
+          <el-form-item class="form-field">
+            <label class="field-label">City</label>
+            <el-input
+              v-model="form.city"
+              type="city"
+              placeholder="Enter your city"
+              class="modern-input"
+            />
+          </el-form-item>
+
+          <el-form-item class="form-field">
+            <label class="field-label">Country</label>
+            <el-input
+              v-model="form.country"
+              type="city"
+              placeholder="Enter your country"
+              class="modern-input"
+            />
+          </el-form-item>
+
+          <el-form-item class="form-field">
+            <label class="field-label">Postal Code</label>
+            <el-input
+              v-model="form.postalCode"
+              type="postalCode"
+              placeholder="Enter your postal code"
+              class="modern-input"
+            />
+          </el-form-item>
+
+          <el-button type="primary" @click="submit" class="submit-button" size="large">
+            Submit
+          </el-button>
         </el-form>
       </div>
     </el-dialog>

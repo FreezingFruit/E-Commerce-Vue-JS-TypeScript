@@ -1,14 +1,17 @@
 import type { Cart } from '@/types/Cart'
 import type { Product } from '@/types/Product'
+import type { PurchaseHistory } from '@/types/PurchaseHistory'
 import { mockProducts } from '@/utils/ProductUtil'
 import { ElMessage } from 'element-plus'
 import { defineStore } from 'pinia'
+import { useAuthStore } from './AuthStore'
 
 export const useProductStore = defineStore('product', {
   state: () => ({
     products: mockProducts as Product[],
     searchQuery: '',
     cartItems: JSON.parse(localStorage.getItem('cartItems') || '[]') as Cart[],
+    purchaseHistory: [] as PurchaseHistory[],
   }),
   getters: {
     filtheredProducts: (state) =>
@@ -59,9 +62,23 @@ export const useProductStore = defineStore('product', {
     },
 
     checkout() {
+      const authStore = useAuthStore()
+      if (!authStore.currentUser || this.cartItems.length === 0) return
+
+      const history = {
+        id: Date.now(),
+        date: new Date().toISOString(),
+        items: JSON.parse(JSON.stringify(this.cartItems)),
+      } as PurchaseHistory
+
+      authStore.currentUser.purchaseHistory ??= []
+      authStore.currentUser.purchaseHistory.unshift(history)
+
+      authStore.persistUserChanges()
+
       this.cartItems = []
       localStorage.removeItem('cartItems')
-      ElMessage.success('Checkout successful!')
+      ElMessage.success('Checkout Successful!')
     },
   },
 })

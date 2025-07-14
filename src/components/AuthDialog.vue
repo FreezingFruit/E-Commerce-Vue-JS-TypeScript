@@ -38,6 +38,7 @@ const submit = () => {
         id: Date.now(),
         email: form.email,
         password: form.password,
+        address: {},
       })
       ElMessage.success('Registered!')
     } else {

@@ -1,14 +1,17 @@
+import type { PurchaseHistory } from './PurchaseHistory'
+
 export interface User {
   id?: number
   email: string
   password: string
   firstName?: string
   lastName?: string
-  phone?: string
+  phone?: number
+  purchaseHistory?: PurchaseHistory[]
   address?: {
     street?: string
     city?: string
-    postalCode?: string
+    postalCode?: number
     country?: string
   }
 }

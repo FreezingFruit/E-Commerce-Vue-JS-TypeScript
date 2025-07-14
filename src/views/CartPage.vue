@@ -1,8 +1,10 @@
 <script lang="ts" setup>
 import CartComp from '@/components/CartComp.vue'
 import { useProductStore } from '@/stores/ProductStore'
+import { useRouter } from 'vue-router'
 
 const productStore = useProductStore()
+const router = useRouter()
 </script>
 
 <template>
@@ -26,7 +28,7 @@ const productStore = useProductStore()
             class="checkoutBtn"
             type="primary"
             size="large"
-            @click="productStore.checkout"
+            @click="router.push('/checkout')"
           >
             CHECK OUT
           </el-button>
