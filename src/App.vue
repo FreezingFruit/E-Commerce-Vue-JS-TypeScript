@@ -12,7 +12,6 @@ const { layout } = useLayout()
 </template>
 
 <style lang="css">
-/* Global styles - not scoped so they apply everywhere */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -50,11 +49,9 @@ html {
 .page-container {
   flex: 1;
   min-height: calc(100vh - 64px);
-
   background-color: #f5f5f5;
 }
 
-/* Global responsive utilities */
 @media (max-width: 768px) {
   .page-container {
     padding: 16px;
@@ -65,13 +62,5 @@ html {
   .page-container {
     padding: 12px;
   }
-}
-</style>
-
-<style lang="css" scoped>
-#app {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
 }
 </style>

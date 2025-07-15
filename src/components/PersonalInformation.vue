@@ -1,9 +1,9 @@
 <script lang="ts" setup>
-import { useAuthStore } from '@/stores/AuthStore'
+import { useUserStore } from '@/stores/UserStore'
 import { ref } from 'vue'
 import EditDialog from './EditDialog.vue'
 
-const authStore = useAuthStore()
+const userStore = useUserStore()
 const showEdit = ref(false)
 </script>
 
@@ -21,15 +21,15 @@ const showEdit = ref(false)
           <div class="info-grid">
             <div class="info-item">
               <label>First Name</label>
-              <span>{{ authStore.currentUser?.firstName || 'No name entered' }}</span>
+              <span>{{ userStore.currentUser?.firstName || 'No name entered' }}</span>
             </div>
             <div class="info-item">
               <label>Last Name</label>
-              <span>{{ authStore.currentUser?.lastName || 'No name entered' }}</span>
+              <span>{{ userStore.currentUser?.lastName || 'No name entered' }}</span>
             </div>
             <div class="info-item">
               <label>Phone</label>
-              <span>{{ authStore.currentUser?.phone || 'No phone number entered' }}</span>
+              <span>{{ userStore.currentUser?.phone || 'No phone number entered' }}</span>
             </div>
           </div>
         </div>
@@ -41,22 +41,22 @@ const showEdit = ref(false)
           <div class="info-grid">
             <div class="info-item">
               <label>Street</label>
-              <span>{{ authStore.currentUser?.address?.street || 'Missing street address' }}</span>
+              <span>{{ userStore.currentUser?.address?.street || 'Missing street address' }}</span>
             </div>
             <div class="info-item">
               <label>City</label>
-              <span>{{ authStore.currentUser?.address?.city || 'Missing city address' }}</span>
+              <span>{{ userStore.currentUser?.address?.city || 'Missing city address' }}</span>
             </div>
             <div class="info-item">
               <label>Country</label>
               <span>{{
-                authStore.currentUser?.address?.country || 'Missing country address'
+                userStore.currentUser?.address?.country || 'Missing country address'
               }}</span>
             </div>
             <div class="info-item">
               <label>Postal Code</label>
               <span>{{
-                authStore.currentUser?.address?.postalCode || 'Missing postal code address'
+                userStore.currentUser?.address?.postalCode || 'Missing postal code address'
               }}</span>
             </div>
           </div>

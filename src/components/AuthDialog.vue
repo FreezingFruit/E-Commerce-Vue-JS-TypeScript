@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { reactive, computed, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import { useAuthStore } from '@/stores/AuthStore'
+import { useUserStore } from '@/stores/UserStore'
+import { userFormRules } from '@/composables/ruleForm'
 
 const props = defineProps<{
   visible: boolean
@@ -14,9 +15,20 @@ watch(
   () => props.visible,
   (v) => (dialogVisible.value = v),
 )
-watch(dialogVisible, (v) => emit('update:visible', v))
+watch(dialogVisible, (v) => {
+  if (v) currentMode.value = props.mode
+  emit('update:visible', v)
+})
 
-const auth = useAuthStore()
+//for swapping modes
+const currentMode = ref(props.mode)
+watch(
+  () => props.mode,
+  (v) => (currentMode.value = v),
+)
+// --------------------
+
+const userStore = useUserStore()
 const form = reactive({
   email: '',
   password: '',
@@ -24,17 +36,17 @@ const form = reactive({
 })
 
 const validForm = computed(() =>
-  props.mode === 'register'
+  currentMode.value === 'register'
     ? form.email && form.password.length >= 6 && form.password === form.confirm
     : form.email && form.password,
 )
 
 const submit = () => {
   try {
-    if (props.mode === 'register') {
-      if (auth.users.some((u) => u.email === form.email))
+    if (currentMode.value === 'register') {
+      if (userStore.users.some((u) => u.email === form.email))
         throw new Error('Email already registered')
-      auth.register({
+      userStore.register({
         id: Date.now(),
         email: form.email,
         password: form.password,
@@ -42,7 +54,7 @@ const submit = () => {
       })
       ElMessage.success('Registered!')
     } else {
-      auth.login(form.email, form.password)
+      userStore.login(form.email, form.password)
       ElMessage.success('Logged in!')
     }
     dialogVisible.value = false
@@ -56,7 +68,7 @@ const submit = () => {
 <template>
   <el-dialog
     v-model="dialogVisible"
-    :title="props.mode === 'login' ? 'Login' : 'Register'"
+    :title="currentMode === 'login' ? 'Login' : 'Register'"
     width="420px"
     align-center
     class="modern-dialog"
@@ -64,15 +76,15 @@ const submit = () => {
     <div class="form-container">
       <div class="form-header">
         <h2 class="form-title">
-          {{ props.mode === 'login' ? 'Welcome back' : 'Create account' }}
+          {{ currentMode === 'login' ? 'WELCOME BACK' : 'CREATE ACCOUNT' }}
         </h2>
         <p class="form-subtitle">
-          {{ props.mode === 'login' ? 'Sign in to your account' : 'Join us today' }}
+          {{ currentMode === 'login' ? 'Sign in to your account' : 'Join us today' }}
         </p>
       </div>
 
-      <el-form @submit.prevent="submit" class="modern-form">
-        <el-form-item class="form-field">
+      <el-form @submit.prevent="submit" class="modern-form" :rules="userFormRules" :model="form">
+        <el-form-item prop="email" class="form-field">
           <label class="field-label">Email address</label>
           <el-input
             v-model="form.email"
@@ -83,7 +95,7 @@ const submit = () => {
           />
         </el-form-item>
 
-        <el-form-item class="form-field">
+        <el-form-item prop="password" class="form-field">
           <label class="field-label">Password</label>
           <el-input
             v-model="form.password"
@@ -94,7 +106,7 @@ const submit = () => {
           />
         </el-form-item>
 
-        <el-form-item v-if="props.mode === 'register'" class="form-field">
+        <el-form-item prop="confirm-password" v-if="currentMode === 'register'" class="form-field">
           <label class="field-label">Confirm password</label>
           <el-input
             v-model="form.confirm"
@@ -112,9 +124,18 @@ const submit = () => {
           class="submit-button"
           size="large"
         >
-          {{ props.mode === 'login' ? 'Sign in' : 'Create account' }}
+          {{ currentMode === 'login' ? 'Sign in' : 'Create account' }}
         </el-button>
       </el-form>
+
+      <el-button
+        type="primary"
+        @click="currentMode = currentMode === 'login' ? 'register' : 'login'"
+        class="switch-btn"
+        size="large"
+      >
+        {{ currentMode === 'login' ? 'No Account? Sign up' : 'Have an account? Log in' }}
+      </el-button>
     </div>
   </el-dialog>
 </template>
@@ -177,7 +198,7 @@ const submit = () => {
   font-size: 14px;
   font-weight: 500;
   color: #000;
-  margin-bottom: 8px;
+  margin-top: 20px;
   letter-spacing: -0.01em;
 }
 
@@ -214,7 +235,7 @@ const submit = () => {
   width: 100%;
   height: 48px;
   border-radius: 8px;
-  background-color: black !;
+  margin-top: 20px;
   border: none;
   font-size: 14px;
   font-weight: 500;
@@ -243,6 +264,18 @@ const submit = () => {
 
 .modern-form .el-form-item__content {
   line-height: normal;
+}
+
+.switch-btn {
+  width: 100%;
+  height: 48px;
+  border-radius: 8px;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  transition: all 0.2s ease;
+  margin-top: 10px;
 }
 
 @media (max-width: 480px) {

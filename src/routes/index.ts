@@ -1,3 +1,5 @@
+import { useUserStore } from '@/stores/UserStore'
+import { useUiStore } from '@/stores/UiStore'
 import CartPage from '@/views/CartPage.vue'
 import CategoryPage from '@/views/CategoryPage.vue'
 import CheckoutPage from '@/views/CheckoutPage.vue'
@@ -16,6 +18,7 @@ const routes = [
     component: CheckoutPage,
     meta: {
       layout: 'checkout',
+      requiresAuth: true,
     },
   },
   { path: '/product/:name', name: 'ProductDetail', component: ProductDetailPage },
@@ -25,6 +28,7 @@ const routes = [
     component: CartPage,
     meta: {
       layout: 'cart',
+      requiresAuth: true,
     },
   },
   { path: '/category/:name', name: 'Category', component: CategoryPage },
@@ -34,6 +38,7 @@ const routes = [
     component: ProfilePage,
     meta: {
       layout: 'profile',
+      requiresAuth: true,
     },
   },
 ]
@@ -41,6 +46,19 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
+})
+
+router.beforeEach((to, _from, next) => {
+  const userStore = useUserStore()
+  const uiStore = useUiStore()
+
+  if (to.matched.some((rec) => rec.meta.requiresAuth)) {
+    if (!userStore.isLoggedIn) {
+      uiStore.showLoginDialog('login')
+      return next('/')
+    }
+  }
+  next()
 })
 
 export default router

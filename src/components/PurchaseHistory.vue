@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import { useAuthStore } from '@/stores/AuthStore'
+import { useUserStore } from '@/stores/UserStore'
 
-const authStore = useAuthStore()
+const userStore = useUserStore()
 </script>
 
 <template>
@@ -9,8 +9,8 @@ const authStore = useAuthStore()
     <h1>PURCHASE HISTORY</h1>
     <el-divider />
     <el-table
-      v-if="authStore.currentUser?.purchaseHistory?.length"
-      :data="authStore.currentUser?.purchaseHistory"
+      v-if="userStore.currentUser?.purchaseHistory?.length"
+      :data="userStore.currentUser?.purchaseHistory"
       style="width: 100%"
     >
       <el-table-column prop="date" label="Date">
@@ -32,7 +32,7 @@ const authStore = useAuthStore()
         </template></el-table-column
       >
 
-      <el-table-column label="Total" align="right">
+      <el-table-column label="Total">
         <template #default="{ row }">
           ₱{{
             row.items
@@ -41,9 +41,17 @@ const authStore = useAuthStore()
           }}
         </template>
       </el-table-column>
+
+      <el-table-column label="Clear History" align="right" width="100px">
+        <template #default="{ row }">
+          <el-icon class="delete-icon" @click="userStore.deletePurchaseHistory(row.id)"
+            ><CircleCloseFilled
+          /></el-icon>
+        </template>
+      </el-table-column>
     </el-table>
 
-    <el-empty v-else description="description" />
+    <el-empty v-else description="NO PURCHASE HISTORY" />
   </section>
 </template>
 
@@ -59,5 +67,9 @@ const authStore = useAuthStore()
 h1 {
   text-align: center;
   font-size: 24px;
+}
+
+:deep(.el-table__cell) {
+  font-size: 16px;
 }
 </style>

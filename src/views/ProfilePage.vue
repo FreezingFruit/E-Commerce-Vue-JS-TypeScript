@@ -1,8 +1,25 @@
 <script lang="ts" setup>
+import OrderTimeline from '@/components/OrderTimeline.vue'
 import PersonalInformation from '@/components/PersonalInformation.vue'
 import PurchaseHistory from '@/components/PurchaseHistory.vue'
-import { ref } from 'vue'
-const current = ref<'info' | 'history'>('info')
+import { computed, ref } from 'vue'
+
+type View = 'info' | 'history' | 'timeline'
+const current = ref<View>('info')
+
+const currentComponent = computed(() => {
+  switch (current.value) {
+    case 'info':
+      return PersonalInformation
+    case 'history':
+      return PurchaseHistory
+    case 'timeline':
+      return OrderTimeline
+
+    default:
+      return null
+  }
+})
 </script>
 
 <template>
@@ -13,17 +30,26 @@ const current = ref<'info' | 'history'>('info')
           <h2 class="sidebar-title">PROFILE</h2>
           <div class="sidebar-menu">
             <div class="menu-item">
-              <el-button type="primary" @click="current = 'info'">Personal Information</el-button>
+              <el-button class="menu-btn" type="primary" @click="current = 'info'"
+                >Personal Information</el-button
+              >
             </div>
             <div class="menu-item">
-              <el-button type="primary" @click="current = 'history'">Purchase History</el-button>
+              <el-button class="menu-btn" type="primary" @click="current = 'history'"
+                >Purchase History</el-button
+              >
+            </div>
+            <div class="menu-item">
+              <el-button class="menu-btn" type="primary" @click="current = 'timeline'"
+                >Track your order</el-button
+              >
             </div>
           </div>
         </div>
       </div>
       <div class="right-side">
         <div class="content-wrapper">
-          <component :is="current === 'info' ? PersonalInformation : PurchaseHistory" />
+          <component :is="currentComponent" />
         </div>
       </div>
     </div>
@@ -80,12 +106,12 @@ const current = ref<'info' | 'history'>('info')
 }
 
 .content-wrapper {
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
   padding: 60px 40px;
 }
 
-:deep(.el-button) {
+.menu-btn {
   background-color: black;
   min-width: 12rem;
   min-height: 4rem;
@@ -95,7 +121,7 @@ const current = ref<'info' | 'history'>('info')
   box-shadow: 0 0 15px 10px rgba(0, 0, 0, 0.2);
 }
 
-:deep(.el-button):hover {
+.menu-btn:hover {
   background-color: gray;
   border-color: white;
   box-shadow: 5px 5px 8px gray;

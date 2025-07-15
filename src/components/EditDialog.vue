@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { useAuthStore } from '@/stores/AuthStore'
+import { useUserStore } from '@/stores/UserStore'
 import { ElMessage } from 'element-plus'
 import { reactive, ref, watch, watchEffect } from 'vue'
 
@@ -8,7 +8,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits(['update:visible'])
-const authStore = useAuthStore()
+const userStore = useUserStore()
 
 const dialogVisible = ref(props.visible)
 watch(
@@ -29,7 +29,7 @@ const form = reactive({
 
 const submit = () => {
   try {
-    authStore.updateProfile({
+    userStore.updateProfile({
       firstName: form.firstName,
       lastName: form.lastName,
       phone: Number(form.phone),
@@ -48,7 +48,7 @@ const submit = () => {
 }
 
 watchEffect(() => {
-  const user = authStore.currentUser
+  const user = userStore.currentUser
   if (!user) return
   form.firstName = user.firstName || ''
   form.lastName = user.lastName || ''

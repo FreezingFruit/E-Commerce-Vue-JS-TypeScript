@@ -1,3 +1,4 @@
+import type { Cart } from './Cart'
 import type { PurchaseHistory } from './PurchaseHistory'
 
 export interface User {
@@ -8,6 +9,7 @@ export interface User {
   lastName?: string
   phone?: number
   purchaseHistory?: PurchaseHistory[]
+  cartItems?: Cart[]
   address?: {
     street?: string
     city?: string

@@ -1,10 +1,11 @@
 <script lang="ts" setup>
-import { useAuthStore } from '@/stores/AuthStore'
+import { useUserStore } from '@/stores/UserStore'
 import { useProductStore } from '@/stores/ProductStore'
 import { ElMessage } from 'element-plus'
-import { reactive, watchEffect } from 'vue'
+import { computed, reactive, watchEffect } from 'vue'
+import { useRouter } from 'vue-router'
 
-const authStore = useAuthStore()
+const userStore = useUserStore()
 const productStore = useProductStore()
 const form = reactive({
   firstName: '',
@@ -16,9 +17,11 @@ const form = reactive({
   postalCode: '',
 })
 
+const router = useRouter()
+
 const submitCheckout = () => {
   try {
-    authStore.updateProfile({
+    userStore.updateProfile({
       firstName: form.firstName,
       lastName: form.lastName,
       phone: Number(form.phone) || 0,
@@ -31,14 +34,27 @@ const submitCheckout = () => {
     })
 
     productStore.checkout()
-    ElMessage.success('Credentials Added!')
+    // temporary router - should route to receipt
+    router.push('/')
+    //no need for el message the checkout function handles it
   } catch {
     ElMessage.error('Something went wrong!')
   }
 }
 
+const isFormComplete = computed(
+  () =>
+    form.firstName &&
+    form.lastName &&
+    form.phone &&
+    form.street &&
+    form.city &&
+    form.country &&
+    form.postalCode,
+)
+
 watchEffect(() => {
-  const user = authStore.currentUser
+  const user = userStore.currentUser
   if (!user) return
   form.firstName = user.firstName || ''
   form.lastName = user.lastName || ''
@@ -129,7 +145,13 @@ watchEffect(() => {
               />
             </el-form-item>
 
-            <el-button type="primary" @click="submitCheckout" class="submit-button" size="large">
+            <el-button
+              type="primary"
+              :disabled="!isFormComplete || !productStore.cartItems.length"
+              @click="submitCheckout"
+              class="submit-button"
+              size="large"
+            >
               CONTINUE TO DELIVERY
             </el-button>
           </el-form>
@@ -138,8 +160,9 @@ watchEffect(() => {
       <div class="right">
         <div class="summary-container">
           <h2>ORDER SUMMARY</h2>
-          <div class="summary-content">
+          <div v-if="productStore.cartItems.length" class="summary-content">
             <ul class="summary-list">
+              <el-divider />
               <li
                 v-for="item in productStore.cartItems"
                 :key="item.product.id"
@@ -151,8 +174,11 @@ watchEffect(() => {
                   ₱{{ (item.product.price * item.quantity).toLocaleString() }}
                 </span>
               </li>
+              <el-divider />
             </ul>
           </div>
+
+          <el-empty v-else description="NO ORDERS FOUND" />
           <strong class="total">SUBTOTAL: ₱{{ productStore.subTotal.toLocaleString() }}</strong>
         </div>
       </div>
@@ -213,6 +239,10 @@ watchEffect(() => {
   box-shadow: 5px 5px 8px gray;
 }
 
+.submit-button:disabled {
+  background-color: gray !important;
+}
+
 .right {
   background: #fafafa;
   display: flex;
@@ -227,7 +257,7 @@ watchEffect(() => {
   flex-direction: column;
   border-radius: 10px;
   align-items: center;
-  width: 600px;
+  min-width: 600px;
   height: 500px;
   border: solid 1px;
   box-shadow: 5px 5px 8px gray;

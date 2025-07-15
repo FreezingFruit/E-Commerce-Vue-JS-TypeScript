@@ -1,9 +1,9 @@
 <script lang="ts" setup>
 import FooterComp from '@/components/FooterComp.vue'
-import NavbarCart from '@/components/NavbarCart.vue'
+import NavbarComp from '@/components/NavbarComp.vue'
 </script>
 <template>
-  <header><NavbarCart /></header>
+  <header><NavbarComp /></header>
   <main>
     <slot></slot>
   </main>

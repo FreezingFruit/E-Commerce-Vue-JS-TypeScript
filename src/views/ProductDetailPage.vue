@@ -1,5 +1,7 @@
 <script lang="ts" setup>
+import { useUserStore } from '@/stores/UserStore'
 import { useProductStore } from '@/stores/ProductStore'
+import { useUiStore } from '@/stores/UiStore'
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
@@ -7,19 +9,32 @@ const route = useRoute()
 const router = useRouter()
 const productStore = useProductStore()
 const quantity = ref(1)
+const userStore = useUserStore()
+const uiStore = useUiStore()
 
 const productName = route.params.name as string
 const product = productStore.products.find(
   (product) => product.name === decodeURIComponent(productName),
 )
 
-const handleAddToCartAndCheckout = () => {
-  if (product) {
-    productStore.addToCart(product, quantity.value)
-    router.push('/cart')
-  } else {
-    console.error('Product not found')
+const handleBuyNow = () => {
+  if (userStore.isLoggedIn) {
+    if (product) {
+      productStore.addToCart(product, quantity.value)
+      router.push('/cart')
+    } else {
+      console.error('Product not found')
+    }
+  } else uiStore.showLoginDialog('login')
+}
+
+const handleAddToCart = () => {
+  if (!userStore.isLoggedIn) {
+    uiStore.showLoginDialog('login')
+    return
   }
+
+  productStore.addToCart(product!, quantity.value)
 }
 </script>
 
@@ -46,7 +61,7 @@ const handleAddToCartAndCheckout = () => {
           <el-button
             class="action-button"
             type="primary"
-            @click="handleAddToCartAndCheckout"
+            @click="handleBuyNow"
             style="background-color: #ffb916"
             >Buy Now</el-button
           >
@@ -54,7 +69,7 @@ const handleAddToCartAndCheckout = () => {
           <el-button
             class="action-button"
             type="primary"
-            @click="productStore.addToCart(product, quantity)"
+            @click="handleAddToCart"
             style="background-color: #f57224"
             >Add To Cart</el-button
           >

@@ -12,7 +12,7 @@ import { Categories } from '@/utils/CategoryUtil'
         class="card-link"
         :to="`/category/${encodeURIComponent(category)}`"
       >
-        <el-card class="category-card">
+        <el-card class="category-card" shadow="hover">
           <p>{{ category.toUpperCase() }}</p>
         </el-card>
       </router-link>

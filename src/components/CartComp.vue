@@ -1,6 +1,10 @@
 <script lang="ts" setup>
 import { useProductStore } from '@/stores/ProductStore'
 const productStore = useProductStore()
+
+function onQuantityChange(item: { product: { id: number } }, val: number) {
+  productStore.updateQuantity(item.product.id, val)
+}
 </script>
 
 <template>
@@ -15,8 +19,11 @@ const productStore = useProductStore()
       <el-table-column label="Price">
         <template #default="{ row }"> ₱{{ row.product.price.toLocaleString() }} </template>
       </el-table-column>
-      <el-table-column prop="quantity" label="Quantity" />
-      <!--ADD QUANTITY el-input-number-->
+      <el-table-column label="Quantity">
+        <template #default="{ row }">
+          <el-input-number v-model="row.quantity" :min="1" :max="100" @change="onQuantityChange" />
+        </template>
+      </el-table-column>
       <el-table-column label="Total">
         <template #default="{ row }">
           ₱{{ Math.floor(row.product.price * row.quantity).toLocaleString() }}

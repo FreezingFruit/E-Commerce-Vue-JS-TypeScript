@@ -1,11 +1,16 @@
 import type { User } from '@/types/User'
 import { defineStore } from 'pinia'
 
-export const useAuthStore = defineStore('auth', {
+export const useUserStore = defineStore('auth', {
   state: () => ({
     users: JSON.parse(localStorage.getItem('users') || '[]') as User[],
     currentUser: JSON.parse(localStorage.getItem('currentUser') || 'null') as User | null,
   }),
+
+  getters: {
+    isLoggedIn: (state) => !!state.currentUser,
+    cart: (state) => state.currentUser?.cartItems ?? [],
+  },
 
   actions: {
     register(user: User) {
@@ -58,6 +63,16 @@ export const useAuthStore = defineStore('auth', {
       if (index !== -1) this.users[index] = { ...this.currentUser! }
       localStorage.setItem('currentUser', JSON.stringify(this.currentUser))
       localStorage.setItem('users', JSON.stringify(this.users))
+    },
+
+    deletePurchaseHistory(id: number) {
+      if (!this.currentUser) return
+
+      this.currentUser.purchaseHistory = (this.currentUser.purchaseHistory || []).filter(
+        (h) => h.id !== id,
+      )
+
+      this.persistUserChanges()
     },
   },
 })

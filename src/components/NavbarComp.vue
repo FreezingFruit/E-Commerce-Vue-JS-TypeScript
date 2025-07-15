@@ -1,15 +1,19 @@
 <script lang="ts" setup>
-import router from '@/routes'
-import { useAuthStore } from '@/stores/AuthStore'
+import { useUserStore } from '@/stores/UserStore'
 import { useProductStore } from '@/stores/ProductStore'
 import type { Product } from '@/types/Product'
 import { ShoppingCart } from '@element-plus/icons-vue'
 import { ref } from 'vue'
 import AuthDialog from './AuthDialog.vue'
+import { useUiStore } from '@/stores/UiStore'
+import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
 
-const authStore = useAuthStore()
+const userStore = useUserStore()
 const productStore = useProductStore()
+const uiStore = useUiStore()
 const searchText = ref('')
+const router = useRouter()
 const querySearchAsync = (queryString: string, cb: (results: Product[]) => void) => {
   const results = productStore.products.filter((product) =>
     product.name.toLowerCase().includes(queryString.toLowerCase()),
@@ -19,6 +23,12 @@ const querySearchAsync = (queryString: string, cb: (results: Product[]) => void)
 
 const handleSelect = (item: { name: string }) => {
   router.push(`/product/${encodeURIComponent(item.name)}`)
+}
+
+const logout = () => {
+  ElMessage.success('Log out successful')
+  userStore.logout()
+  router.push('/')
 }
 
 const showLogin = ref(false)
@@ -51,19 +61,23 @@ const showRegister = ref(false)
             <h3>PRODUCTS</h3>
           </router-link>
 
-          <span v-if="!authStore.currentUser" class="product-link" @click="showLogin = true">
+          <span v-if="!userStore.currentUser" class="product-link" @click="showLogin = true">
             <h3>LOGIN</h3>
           </span>
-          <span v-if="!authStore.currentUser" class="product-link" @click="showRegister = true">
+          <span v-if="!userStore.currentUser" class="product-link" @click="showRegister = true">
             <h3>REGISTER</h3>
           </span>
           <AuthDialog v-model:visible="showLogin" mode="login" />
           <AuthDialog v-model:visible="showRegister" mode="register" />
+          <AuthDialog
+            v-model:visible="uiStore.loginDialogVisible"
+            :mode="uiStore.loginDialogMode"
+          />
 
-          <router-link v-if="authStore.currentUser" to="/profile" class="product-link">
+          <router-link v-if="userStore.currentUser" to="/profile" class="product-link">
             <h3>PROFILE</h3>
           </router-link>
-          <span v-if="authStore.currentUser" class="product-link" @click="authStore.logout">
+          <span v-if="userStore.currentUser" class="product-link" @click="logout">
             <h3>LOGOUT</h3>
           </span>
 
