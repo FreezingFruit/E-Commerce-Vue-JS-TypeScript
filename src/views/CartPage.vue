@@ -11,8 +11,8 @@ const router = useRouter()
   <section id="cart" class="page-container">
     <div class="cart-content">
       <h1>
-        - - - YOUR CART {{ productStore.totalProducts }}
-        {{ productStore.totalProducts == 1 ? 'ITEM' : 'ITEMS' }} - - -
+        YOUR CART HAS {{ productStore.totalProducts }}
+        {{ productStore.totalProducts == 1 ? 'ITEM' : 'ITEMS' }}
       </h1>
 
       <div class="cart-main">

@@ -1,16 +1,21 @@
 <script lang="ts" setup>
+import { shippingDetailsRules } from '@/composables/ruleFormShipping'
 import { useUserStore } from '@/stores/UserStore'
-import { ElMessage } from 'element-plus'
+import { ElMessage, type FormInstance } from 'element-plus'
 import { reactive, ref, watch, watchEffect } from 'vue'
 
 const props = defineProps<{
   visible: boolean
 }>()
 
+const formRef = ref<FormInstance>()
+
 const emit = defineEmits(['update:visible'])
 const userStore = useUserStore()
 
 const dialogVisible = ref(props.visible)
+
+//needed watch to make the dialog appear
 watch(
   () => props.visible,
   (v) => (dialogVisible.value = v),
@@ -27,12 +32,16 @@ const form = reactive({
   postalCode: '',
 })
 
-const submit = () => {
+const submit = async () => {
+  if (!formRef.value) return
+
   try {
+    await formRef.value.validate()
+
     userStore.updateProfile({
       firstName: form.firstName,
       lastName: form.lastName,
-      phone: Number(form.phone),
+      phone: form.phone,
       address: {
         street: form.street,
         city: form.city,
@@ -62,83 +71,95 @@ watchEffect(() => {
 
 <template>
   <section id="edit">
-    <el-dialog v-model="dialogVisible" width="420px" align-center class="modern-dialog">
+    <el-dialog v-model="dialogVisible" width="700px" align-center class="modern-dialog">
       <div class="form-container">
-        <el-form @submit.prevent="submit" class="modern-form">
-          <el-form-item class="form-field">
-            <label class="field-label">First Name</label>
-            <el-input
-              v-model="form.firstName"
-              type="firstName"
-              placeholder="Enter your first name"
-              class="modern-input"
-              clearable
-            />
-          </el-form-item>
+        <h2 class="form-title">EDIT YOUR PROFILE</h2>
+        <el-form
+          @submit.prevent="submit"
+          class="modern-form two-column-form"
+          :rules="shippingDetailsRules"
+          :model="form"
+          ref="formRef"
+        >
+          <div class="form-left">
+            <el-form-item class="form-field" prop="firstName">
+              <label class="field-label">First Name</label>
+              <el-input
+                v-model="form.firstName"
+                placeholder="Enter your first name"
+                class="modern-input"
+                clearable
+              />
+            </el-form-item>
 
-          <el-form-item class="form-field">
-            <label class="field-label">Last Name</label>
-            <el-input
-              v-model="form.lastName"
-              type="lastName"
-              placeholder="Enter your last name"
-              class="modern-input"
-            />
-          </el-form-item>
+            <el-form-item class="form-field" prop="lastName">
+              <label class="field-label">Last Name</label>
+              <el-input
+                v-model="form.lastName"
+                placeholder="Enter your last name"
+                class="modern-input"
+                clearable
+              />
+            </el-form-item>
 
-          <el-form-item class="form-field">
-            <label class="field-label">Phone Number</label>
-            <el-input
-              v-model="form.phone"
-              type="phone"
-              placeholder="Enter your phone number"
-              class="modern-input"
-            />
-          </el-form-item>
+            <el-form-item class="form-field" prop="phone">
+              <label class="field-label">Phone Number</label>
+              <el-input
+                v-model="form.phone"
+                placeholder="ex. 09123456789"
+                class="modern-input"
+                maxlength="11"
+                clearable
+              />
+            </el-form-item>
+          </div>
 
-          <el-form-item class="form-field">
-            <label class="field-label">Street</label>
-            <el-input
-              v-model="form.street"
-              type="street"
-              placeholder="Enter your street"
-              class="modern-input"
-            />
-          </el-form-item>
+          <div class="form-right">
+            <el-form-item class="form-field" prop="street">
+              <label class="field-label">Street</label>
+              <el-input
+                v-model="form.street"
+                placeholder="Enter your street"
+                class="modern-input"
+                clearable
+              />
+            </el-form-item>
 
-          <el-form-item class="form-field">
-            <label class="field-label">City</label>
-            <el-input
-              v-model="form.city"
-              type="city"
-              placeholder="Enter your city"
-              class="modern-input"
-            />
-          </el-form-item>
+            <el-form-item class="form-field" prop="city">
+              <label class="field-label">City</label>
+              <el-input
+                v-model="form.city"
+                placeholder="Enter your city"
+                class="modern-input"
+                clearable
+              />
+            </el-form-item>
 
-          <el-form-item class="form-field">
-            <label class="field-label">Country</label>
-            <el-input
-              v-model="form.country"
-              type="city"
-              placeholder="Enter your country"
-              class="modern-input"
-            />
-          </el-form-item>
+            <el-form-item class="form-field" prop="country">
+              <label class="field-label">Country</label>
+              <el-input
+                v-model="form.country"
+                placeholder="Enter your country"
+                class="modern-input"
+                clearable
+              />
+            </el-form-item>
 
-          <el-form-item class="form-field">
-            <label class="field-label">Postal Code</label>
-            <el-input
-              v-model="form.postalCode"
-              type="postalCode"
-              placeholder="Enter your postal code"
-              class="modern-input"
-            />
-          </el-form-item>
+            <el-form-item class="form-field" prop="postalCode">
+              <label class="field-label">Postal Code</label>
+              <el-input
+                v-model="form.postalCode"
+                placeholder="ex. 1234"
+                class="modern-input"
+                maxlength="4"
+                clearable
+              />
+            </el-form-item>
+          </div>
 
-          <el-button type="primary" @click="submit" class="submit-button" size="large">
-            Submit
-          </el-button>
+          <el-button type="primary" class="submit-button" size="large" native-type="submit"
+            >Submit</el-button
+          >
         </el-form>
       </div>
     </el-dialog>
@@ -146,8 +167,27 @@ watchEffect(() => {
 </template>
 
 <style lang="css" scoped>
+.two-column-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+  flex-wrap: wrap;
+}
+
+.form-left,
+.form-right {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.submit-button {
+  grid-column: span 2;
+}
 .modern-dialog .el-dialog {
   border-radius: 16px;
+
   box-shadow:
     0 20px 25px -5px rgba(0, 0, 0, 0.1),
     0 10px 10px -5px rgba(0, 0, 0, 0.04);
@@ -163,27 +203,16 @@ watchEffect(() => {
 }
 
 .form-container {
-  padding: 48px 32px 32px;
-}
-
-.form-header {
-  text-align: center;
-  margin-bottom: 32px;
+  padding: 32px 24px 24px;
 }
 
 .form-title {
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 600;
   color: #000;
-  margin: 0 0 8px 0;
+  margin-bottom: 20px;
   letter-spacing: -0.02em;
-}
-
-.form-subtitle {
-  font-size: 14px;
-  color: #666;
-  margin: 0;
-  font-weight: 400;
+  text-align: center;
 }
 
 .modern-form {
@@ -191,17 +220,13 @@ watchEffect(() => {
 }
 
 .form-field {
-  margin-bottom: 24px;
-}
-
-.form-field:last-of-type {
-  margin-bottom: 32px;
+  margin-bottom: 16px;
 }
 
 .modern-input .el-input__wrapper {
   border-radius: 8px;
   border: 1.5px solid #e5e5e5;
-  padding: 12px 16px;
+  padding: 10px 14px;
   font-size: 14px;
   transition: all 0.2s ease;
   box-shadow: none;
@@ -213,7 +238,7 @@ watchEffect(() => {
 
 .modern-input .el-input__wrapper.is-focus {
   border-color: #000;
-  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05);
 }
 
 .modern-input .el-input__inner {
@@ -227,16 +252,27 @@ watchEffect(() => {
   font-weight: 400;
 }
 
+.field-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: #000;
+  margin-bottom: 6px;
+  letter-spacing: -0.01em;
+}
+
 .submit-button {
   width: 100%;
-  height: 48px;
+  height: 44px;
   border-radius: 8px;
-  background-color: black !;
+  background-color: #000;
+  color: #fff;
   border: none;
   font-size: 14px;
   font-weight: 500;
   letter-spacing: -0.01em;
   transition: all 0.2s ease;
+  margin-top: 16px;
 }
 
 .submit-button:hover:not(.is-disabled) {
@@ -254,21 +290,27 @@ watchEffect(() => {
   cursor: not-allowed;
 }
 
-.modern-form .el-form-item {
-  margin-bottom: 10px;
-}
-
-.modern-form .el-form-item__content {
-  line-height: normal;
-}
-
 @media (max-width: 480px) {
   .form-container {
-    padding: 32px 24px 24px;
+    padding: 24px 16px 16px;
   }
 
   .form-title {
-    font-size: 20px;
+    font-size: 18px;
+    margin-bottom: 16px;
+  }
+
+  .submit-button {
+    height: 42px;
+    font-size: 13px;
+  }
+
+  .two-column-form {
+    grid-template-columns: 1fr;
+  }
+
+  .submit-button {
+    grid-column: span 1;
   }
 }
 </style>

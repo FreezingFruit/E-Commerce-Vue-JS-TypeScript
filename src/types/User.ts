@@ -7,7 +7,7 @@ export interface User {
   password: string
   firstName?: string
   lastName?: string
-  phone?: number
+  phone?: string
   purchaseHistory?: PurchaseHistory[]
   cartItems?: Cart[]
   address?: {

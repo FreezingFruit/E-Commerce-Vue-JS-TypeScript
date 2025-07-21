@@ -3,22 +3,33 @@ import { useUserStore } from '@/stores/UserStore'
 import { useProductStore } from '@/stores/ProductStore'
 import type { Product } from '@/types/Product'
 import { ShoppingCart } from '@element-plus/icons-vue'
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import AuthDialog from './AuthDialog.vue'
 import { useUiStore } from '@/stores/UiStore'
 import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import BurgerComp from './BurgerComp.vue'
 
 const userStore = useUserStore()
 const productStore = useProductStore()
 const uiStore = useUiStore()
 const searchText = ref('')
 const router = useRouter()
-const querySearchAsync = (queryString: string, cb: (results: Product[]) => void) => {
+const showLogin = ref(false)
+const showRegister = ref(false)
+const isMobile = ref(window.innerWidth <= 768)
+const showDrawer = ref(false)
+
+const querySearchAsync = (queryString: string, callback: (results: Product[]) => void) => {
+  if (!queryString || queryString.trim().length < 1) {
+    callback([])
+    return
+  }
+
   const results = productStore.products.filter((product) =>
     product.name.toLowerCase().includes(queryString.toLowerCase()),
   )
-  cb(results)
+  callback(results)
 }
 
 const handleSelect = (item: { name: string }) => {
@@ -26,28 +37,46 @@ const handleSelect = (item: { name: string }) => {
 }
 
 const logout = () => {
-  ElMessage.success('Log out successful')
-  userStore.logout()
-  router.push('/')
+  ElMessageBox.confirm('Are you sure you want to logout?', 'Confirm Logout', {
+    confirmButtonText: 'Yes, log out',
+    cancelButtonText: 'No',
+    type: 'warning',
+  })
+    .then(() => {
+      ElMessage.success('Logout successful')
+      userStore.logout()
+      router.push('/')
+    })
+    .catch(() => {})
 }
 
-const showLogin = ref(false)
-const showRegister = ref(false)
+onMounted(() => {
+  const checkScreenSize = () => {
+    isMobile.value = window.innerWidth < 768
+  }
+
+  checkScreenSize()
+  window.addEventListener('resize', checkScreenSize)
+})
 </script>
 
 <template>
   <section id="navbar">
     <el-header class="navbar">
       <div class="navbar-container">
-        <router-link to="/" class="dashboard-link">
+        <router-link v-if="!isMobile" to="/" class="dashboard-link">
           <div class="logo">
             <h1>DIGISHOP</h1>
           </div>
         </router-link>
 
+        <el-icon v-if="isMobile" class="back-btn" @click="router.back()"><DArrowLeft /></el-icon>
+
         <el-autocomplete
           v-model="searchText"
           :fetch-suggestions="querySearchAsync"
+          :trigger-on-focus="false"
+          :debounce="300"
           placeholder="Search for a product..."
           @select="handleSelect"
           value-key="name"
@@ -56,7 +85,7 @@ const showRegister = ref(false)
           clearable
         />
 
-        <div class="nav-links">
+        <div class="nav-links" v-if="!isMobile">
           <router-link to="/product" class="product-link">
             <h3>PRODUCTS</h3>
           </router-link>
@@ -85,12 +114,22 @@ const showRegister = ref(false)
             <el-icon size="large"><ShoppingCart /></el-icon>
           </router-link>
         </div>
+        <el-icon class="icon-menu" v-if="isMobile" @click="showDrawer = true"><Tools /></el-icon>
+        <BurgerComp v-model:visible="showDrawer" />
       </div>
     </el-header>
   </section>
 </template>
 
 <style lang="css" scoped>
+:deep(.el-drawer) {
+  border-left: 1px solid black;
+}
+
+:deep(.el-drawer__body) {
+  padding: 0;
+}
+
 .navbar {
   background-color: #ffffff;
   border-bottom: 1px solid #e0e0e0;
@@ -141,7 +180,6 @@ const showRegister = ref(false)
   box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
 }
 
-/* NAV LINKS */
 .nav-links {
   display: flex;
   align-items: center;
@@ -193,7 +231,6 @@ const showRegister = ref(false)
   cursor: pointer;
 }
 
-/* CART ICON */
 .cart-icon {
   display: inline-flex;
   align-items: center;
@@ -208,5 +245,33 @@ const showRegister = ref(false)
   color: #409eff;
   background-color: rgba(64, 158, 255, 0.06);
   transform: translateY(-1px);
+}
+
+.icon-menu {
+  cursor: pointer;
+  transition: all 0.2s ease-out;
+  border-radius: 10px;
+  font-size: 23px;
+}
+
+.icon-menu:hover {
+  background-color: black;
+  color: white;
+  transform: rotate(180deg);
+}
+
+.back-btn {
+  font-size: 25px;
+
+  transition: all 0.3s ease;
+}
+
+.back-btn:hover {
+  transform: scale(1.2);
+  border-radius: 20px;
+  background-color: black;
+  border-color: white;
+  color: white;
+  padding-right: 5px;
 }
 </style>

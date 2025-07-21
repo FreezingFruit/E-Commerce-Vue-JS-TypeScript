@@ -1,8 +1,9 @@
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
-import DefaultLayout from '@/layouts/DefaultLayout.vue'
-import CheckoutLayout from '@/layouts/CheckoutLayout.vue'
+import DefaultLayout from '@/Layouts/DefaultLayout.vue'
+import CheckoutLayout from '@/Layouts/CheckoutLayout.vue'
 import ProfileLayout from '@/Layouts/ProfileLayout.vue'
+import NotFoundLayout from '@/Layouts/NotFoundLayout.vue'
 
 export function useLayout() {
   const route = useRoute()
@@ -15,6 +16,9 @@ export function useLayout() {
         return CheckoutLayout
       case 'profile':
         return ProfileLayout
+      case 'notfound':
+        return NotFoundLayout
+
       default:
         return DefaultLayout
     }

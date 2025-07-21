@@ -1,11 +1,23 @@
 <script lang="ts" setup>
 import OrderTimeline from '@/components/OrderTimeline.vue'
 import PersonalInformation from '@/components/PersonalInformation.vue'
+import ProfileMenuDrawer from '@/components/ProfileMenuDrawer.vue'
 import PurchaseHistory from '@/components/PurchaseHistory.vue'
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 type View = 'info' | 'history' | 'timeline'
 const current = ref<View>('info')
+const isMobile = ref(window.innerWidth <= 768)
+const showDrawer = ref(false)
+
+onMounted(() => {
+  const checkScreenSize = () => {
+    isMobile.value = window.innerWidth < 768
+  }
+
+  checkScreenSize()
+  window.addEventListener('resize', checkScreenSize)
+})
 
 const currentComponent = computed(() => {
   switch (current.value) {
@@ -25,7 +37,10 @@ const currentComponent = computed(() => {
 <template>
   <section id="profile" class="page-container">
     <div class="split-wrapper">
-      <div class="left-side">
+      <el-icon v-if="isMobile" class="menu-mobile" @click="showDrawer = true"
+        ><MoreFilled
+      /></el-icon>
+      <div class="left-side" v-if="!isMobile">
         <div class="sidebar">
           <h2 class="sidebar-title">PROFILE</h2>
           <div class="sidebar-menu">
@@ -53,6 +68,15 @@ const currentComponent = computed(() => {
         </div>
       </div>
     </div>
+    <ProfileMenuDrawer
+      v-model:visible="showDrawer"
+      @mode="
+        (val) => {
+          current = val
+          showDrawer = false
+        }
+      "
+    />
   </section>
 </template>
 
@@ -117,7 +141,7 @@ const currentComponent = computed(() => {
   min-height: 4rem;
   border-color: white;
   border-radius: 10px;
-  transition: all 0.3 ease-out;
+  transition: all 0.3s ease;
   box-shadow: 0 0 15px 10px rgba(0, 0, 0, 0.2);
 }
 
@@ -125,5 +149,18 @@ const currentComponent = computed(() => {
   background-color: gray;
   border-color: white;
   box-shadow: 5px 5px 8px gray;
+}
+
+.menu-mobile {
+  font-size: 24px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.menu-mobile:hover {
+  transform: scale(1.2);
+  background-color: black;
+  color: white;
+  border-radius: 20px;
 }
 </style>

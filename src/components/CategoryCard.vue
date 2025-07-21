@@ -4,29 +4,25 @@ import { Categories } from '@/utils/CategoryUtil'
 
 <template>
   <h2>CATEGORIES</h2>
-  <section id="category">
-    <div class="category-container">
-      <router-link
-        v-for="(category, index) in Categories"
-        :key="index"
-        class="card-link"
-        :to="`/category/${encodeURIComponent(category)}`"
-      >
-        <el-card class="category-card" shadow="hover">
-          <p>{{ category.toUpperCase() }}</p>
-        </el-card>
-      </router-link>
-    </div>
-  </section>
+
+  <div class="category-container">
+    <router-link
+      v-for="(category, index) in Categories"
+      :key="index"
+      class="card-link"
+      :to="`/category/${encodeURIComponent(category)}`"
+    >
+      <el-card class="category-card" shadow="hover">
+        <p>{{ category.toUpperCase() }}</p>
+      </el-card>
+    </router-link>
+  </div>
 </template>
 
 <style lang="css" scoped>
-#category {
-  width: 100%;
-}
 h2 {
   text-align: center;
-  margin: 15px 0;
+  margin-bottom: 10px;
 }
 
 .category-card {
@@ -40,6 +36,7 @@ h2 {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
+  width: 100%;
   gap: 12px;
   margin: 0 3px;
 }

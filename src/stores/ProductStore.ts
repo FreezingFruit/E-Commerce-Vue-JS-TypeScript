@@ -12,13 +12,13 @@ export const useProductStore = defineStore('product', {
   }),
   getters: {
     cartItems: () => useUserStore().cart,
-    filtheredProducts: (state) =>
+    filteredProducts: (state) =>
       state.products.filter(
         (product) =>
           product.name.toLowerCase().includes(state.searchQuery.toLowerCase()) ||
           product.description.toLowerCase().includes(state.searchQuery.toLowerCase()),
       ),
-    filtheredCategories: (state) => {
+    filteredCategories: (state) => {
       return (category: string) => state.products.filter((product) => product.category === category)
     },
 

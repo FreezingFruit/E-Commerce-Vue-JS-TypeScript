@@ -1,4 +1,5 @@
 import type { User } from '@/types/User'
+import { ElMessage } from 'element-plus'
 import { defineStore } from 'pinia'
 
 export const useUserStore = defineStore('auth', {
@@ -33,7 +34,7 @@ export const useUserStore = defineStore('auth', {
     updateProfile(user: {
       firstName?: string
       lastName?: string
-      phone?: number
+      phone?: string
       address?: {
         street?: string
         city?: string
@@ -73,6 +74,30 @@ export const useUserStore = defineStore('auth', {
       )
 
       this.persistUserChanges()
+    },
+
+    forgetPassword(email: string, newPassword: string) {
+      const storedUsers = localStorage.getItem('users')
+      if (!storedUsers) return
+
+      const users = JSON.parse(storedUsers) as User[]
+      const userIndex = users.findIndex((u) => u.email === email)
+      if (userIndex === -1) {
+        ElMessage.error('Email not found')
+        return
+      }
+
+      users[userIndex].password = newPassword
+
+      if (this.currentUser && this.currentUser.email === email) {
+        this.currentUser.password = newPassword
+        localStorage.setItem('currentUser', JSON.stringify(this.currentUser))
+      }
+
+      localStorage.setItem('users', JSON.stringify(users))
+      this.users = users
+
+      ElMessage.success('Password updated successfully')
     },
   },
 })

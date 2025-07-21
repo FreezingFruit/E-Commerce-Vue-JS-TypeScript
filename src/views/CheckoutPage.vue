@@ -1,12 +1,27 @@
 <script lang="ts" setup>
 import { useUserStore } from '@/stores/UserStore'
 import { useProductStore } from '@/stores/ProductStore'
-import { ElMessage } from 'element-plus'
-import { computed, reactive, watchEffect } from 'vue'
-import { useRouter } from 'vue-router'
+import { ElMessage, type FormInstance } from 'element-plus'
+import { computed, onMounted, reactive, ref, watchEffect } from 'vue'
+
+import ReceiptDialog from '@/components/ReceiptDialog.vue'
+import { shippingDetailsRules } from '@/composables/ruleFormShipping'
 
 const userStore = useUserStore()
+const formRef = ref<FormInstance>()
 const productStore = useProductStore()
+const showReceipt = ref(false)
+const loading = ref(false)
+const isMobile = ref(window.innerWidth <= 768)
+
+onMounted(() => {
+  const checkIfMobile = () => {
+    isMobile.value = window.innerWidth <= 768
+  }
+
+  checkIfMobile()
+  addEventListener('resize', checkIfMobile)
+})
 const form = reactive({
   firstName: '',
   lastName: '',
@@ -17,14 +32,18 @@ const form = reactive({
   postalCode: '',
 })
 
-const router = useRouter()
+const submitCheckout = async () => {
+  if (!formRef.value) return
 
-const submitCheckout = () => {
   try {
+    await formRef.value.validate()
+    loading.value = true
+
+    await new Promise((resolve) => setTimeout(resolve, 1000))
     userStore.updateProfile({
       firstName: form.firstName,
       lastName: form.lastName,
-      phone: Number(form.phone) || 0,
+      phone: form.phone,
       address: {
         street: form.street,
         city: form.city,
@@ -33,12 +52,12 @@ const submitCheckout = () => {
       },
     })
 
-    productStore.checkout()
-    // temporary router - should route to receipt
-    router.push('/')
+    showReceipt.value = true
     //no need for el message the checkout function handles it
   } catch {
-    ElMessage.error('Something went wrong!')
+    ElMessage.error('Invalid Submission')
+  } finally {
+    loading.value = false
   }
 }
 
@@ -68,13 +87,19 @@ watchEffect(() => {
 
 <template>
   <section id="checkout" class="page-container">
-    <div class="split-wrapper">
+    <div class="split-wrapper" :class="{ 'mobile-layout': isMobile }">
       <div class="left">
         <div class="form-container">
           <h2>SHIPPING ADDRESS</h2>
           <el-divider />
-          <el-form @submit.prevent="submitCheckout" class="modern-form">
-            <el-form-item class="form-field">
+          <el-form
+            @submit.prevent="submitCheckout"
+            class="modern-form"
+            :model="form"
+            ref="formRef"
+            :rules="shippingDetailsRules"
+          >
+            <el-form-item class="form-field" prop="firstName">
               <label class="field-label">First Name</label>
               <el-input
                 v-model="form.firstName"
@@ -85,7 +110,7 @@ watchEffect(() => {
               />
             </el-form-item>
 
-            <el-form-item class="form-field">
+            <el-form-item class="form-field" prop="lastName">
               <label class="field-label">Last Name</label>
               <el-input
                 v-model="form.lastName"
@@ -95,7 +120,7 @@ watchEffect(() => {
               />
             </el-form-item>
 
-            <el-form-item class="form-field">
+            <el-form-item class="form-field" prop="phone">
               <label class="field-label">Phone Number</label>
               <el-input
                 v-model="form.phone"
@@ -105,7 +130,7 @@ watchEffect(() => {
               />
             </el-form-item>
 
-            <el-form-item class="form-field">
+            <el-form-item class="form-field" prop="street">
               <label class="field-label">Street</label>
               <el-input
                 v-model="form.street"
@@ -115,7 +140,7 @@ watchEffect(() => {
               />
             </el-form-item>
 
-            <el-form-item class="form-field">
+            <el-form-item class="form-field" prop="city">
               <label class="field-label">City</label>
               <el-input
                 v-model="form.city"
@@ -125,7 +150,7 @@ watchEffect(() => {
               />
             </el-form-item>
 
-            <el-form-item class="form-field">
+            <el-form-item class="form-field" prop="country">
               <label class="field-label">Country</label>
               <el-input
                 v-model="form.country"
@@ -135,7 +160,7 @@ watchEffect(() => {
               />
             </el-form-item>
 
-            <el-form-item class="form-field">
+            <el-form-item class="form-field" prop="postalCode">
               <label class="field-label">Postal Code</label>
               <el-input
                 v-model="form.postalCode"
@@ -148,17 +173,19 @@ watchEffect(() => {
             <el-button
               type="primary"
               :disabled="!isFormComplete || !productStore.cartItems.length"
-              @click="submitCheckout"
               class="submit-button"
               size="large"
+              native-type="submit"
+              :loading="loading"
             >
-              CONTINUE TO DELIVERY
+              <template v-if="!loading">CONTINUE TO DELIVERY</template>
+              <template v-else>Processing...</template>
             </el-button>
           </el-form>
         </div>
       </div>
       <div class="right">
-        <div class="summary-container">
+        <div class="summary-container" :class="{ 'mobile-summary': isMobile }">
           <h2>ORDER SUMMARY</h2>
           <div v-if="productStore.cartItems.length" class="summary-content">
             <ul class="summary-list">
@@ -183,6 +210,8 @@ watchEffect(() => {
         </div>
       </div>
     </div>
+
+    <ReceiptDialog v-model:visible="showReceipt" />
   </section>
 </template>
 
@@ -191,21 +220,37 @@ watchEffect(() => {
   display: flex;
   min-height: 100vh;
 }
+.left,
+.right {
+  flex: 1;
+}
+
+.right {
+  background: #fafafa;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 48px 32px;
+}
 
 .form-container {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
+  margin: 0 auto;
   padding: 48px 32px;
+  align-items: center;
 }
 .modern-form {
-  padding: 10px 50px;
+  padding: 10px 20px;
+  list-style: none;
+  max-width: 500px;
 }
 
 .summary-list {
   list-style: none;
-  padding: 0 50px;
+  padding: 0 20px;
   margin: 0;
 }
 
@@ -216,17 +261,13 @@ watchEffect(() => {
   padding: 4px 0;
 }
 
-.left,
-.right {
-  flex: 1;
-}
-
 .submit-button {
   background-color: #000000 !important;
   border: none;
   border-radius: 10px;
   align-items: center;
-  width: 500px;
+  width: 100%;
+  max-width: 500px;
   height: 56px;
   letter-spacing: 1px;
   margin-top: 10px;
@@ -243,13 +284,11 @@ watchEffect(() => {
   background-color: gray !important;
 }
 
-.right {
-  background: #fafafa;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  padding: 48px 32px;
+.submit-button.is-loading {
+  background-color: gray !important;
+  opacity: 0.85;
 }
+
 .summary-container {
   background-color: transparent;
   color: black;
@@ -257,7 +296,9 @@ watchEffect(() => {
   flex-direction: column;
   border-radius: 10px;
   align-items: center;
-  min-width: 600px;
+  min-width: 300px;
+  max-width: 600px;
+  width: 100%;
   height: 500px;
   border: solid 1px;
   box-shadow: 5px 5px 8px gray;
@@ -290,5 +331,49 @@ watchEffect(() => {
   text-align: right;
   font-size: 24px;
   margin: auto 10px;
+}
+
+@media (max-width: 768px) {
+  .split-wrapper.mobile-layout {
+    flex-direction: column;
+    min-height: auto;
+  }
+
+  .form-container {
+    padding: 24px 16px;
+  }
+
+  .modern-form {
+    padding: 10px 0;
+  }
+
+  .submit-button {
+    width: 100%;
+    height: 48px;
+  }
+
+  .right {
+    padding: 24px 16px;
+  }
+
+  .summary-container.mobile-summary {
+    min-width: auto;
+    width: 100%;
+    height: auto;
+    min-height: 300px;
+  }
+
+  .summary-list {
+    padding: 0 16px;
+  }
+
+  .summary-container h2 {
+    font-size: 20px;
+  }
+
+  .total {
+    font-size: 20px;
+    margin: 16px 10px;
+  }
 }
 </style>
