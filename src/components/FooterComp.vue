@@ -1,9 +1,7 @@
-<script lang="ts" setup></script>
-
 <template>
   <section id="footer" class="footer">
     <a
-      href="https://github.com/your-username"
+      href="https://github.com/FreezingFruit"
       target="_blank"
       rel="noopener noreferrer"
       class="github-link"
@@ -24,7 +22,7 @@
   justify-content: center;
   align-items: center;
   padding: 20px 0;
-  flex-shrink: 0; /* Prevent footer from shrinking */
+  flex-shrink: 0;
 }
 
 .github-link {

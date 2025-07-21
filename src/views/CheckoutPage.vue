@@ -127,6 +127,7 @@ watchEffect(() => {
                 type="phone"
                 placeholder="Enter your phone number"
                 class="modern-input"
+                maxlength="11"
               />
             </el-form-item>
 
@@ -167,6 +168,7 @@ watchEffect(() => {
                 type="postalCode"
                 placeholder="Enter your postal code"
                 class="modern-input"
+                maxlength="4"
               />
             </el-form-item>
 
