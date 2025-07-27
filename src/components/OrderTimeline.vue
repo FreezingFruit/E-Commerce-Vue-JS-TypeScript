@@ -33,7 +33,7 @@ const nextStep = (orderId: number) => {
           <ul class="product-list">
             <li v-for="item in order.items" :key="item.product.id">
               <span>{{ item.product.name }} X {{ item.quantity }}</span>
-              <span>₱{{ item.product.price * item.quantity }}</span>
+              <span>₱{{ (item.product.price * item.quantity).toLocaleString() }}</span>
             </li>
           </ul>
         </el-collapse-item>

@@ -7,7 +7,11 @@ const productStore = useProductStore()
   <section id="receipt-items">
     <div class="receipt-table-container">
       <div class="receipt-items-list">
-        <div v-for="item in productStore.cartItems" :key="item.product.id" class="receipt-item">
+        <div
+          v-for="item in productStore.checkoutReceiptItems"
+          :key="item.product.id"
+          class="receipt-item"
+        >
           <div class="item-image-container">
             <img class="item-image" :src="item.product.image" :alt="item.product.name" />
           </div>

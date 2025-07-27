@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { useProductStore } from '@/stores/ProductStore'
-import { onMounted, ref } from 'vue'
+import type { Cart } from '@/types/Cart'
+import { computed, onMounted, ref } from 'vue'
 const productStore = useProductStore()
 
 const isMobile = ref(window.innerWidth <= 900)
@@ -17,11 +18,38 @@ onMounted(() => {
 function onQuantityChange(item: { product: { id: number } }, val: number) {
   productStore.updateQuantity(item.product.id, val)
 }
+
+function onSelectionChange(selection: Cart[]) {
+  productStore.selectedCartItemIds = selection.map((item) => item.product.id)
+}
+
+const selectedIds = computed({
+  get: () => productStore.selectedCartItemIds,
+  set: (val: number[]) => {
+    productStore.selectedCartItemIds = val
+  },
+})
+
+const toggleSelection = (productId: number, checked: boolean) => {
+  if (checked) {
+    if (!selectedIds.value.includes(productId)) {
+      selectedIds.value = [...selectedIds.value, productId]
+    } else {
+      selectedIds.value = selectedIds.value.filter((id) => id !== productId)
+    }
+  }
+}
 </script>
 
 <template>
   <section id="cart">
-    <el-table v-if="!isMobile" :data="productStore.cartItems" style="width: 100%">
+    <el-table
+      v-if="!isMobile"
+      :data="productStore.cartItems"
+      style="width: 100%"
+      @selection-change="onSelectionChange"
+    >
+      <el-table-column type="selection" width="55" />
       <el-table-column label="Image">
         <template #default="{ row }">
           <img class="product-image" :src="row.product.image" />
@@ -57,6 +85,11 @@ function onQuantityChange(item: { product: { id: number } }, val: number) {
         class="mobile-cart-item"
         shadow="hover"
       >
+        <el-checkbox
+          class="item-checkbox"
+          :model-value="selectedIds.includes(item.product.id)"
+          @change="(checked: boolean) => toggleSelection(item.product.id, checked)"
+        />
         <div class="item-header">
           <el-image :src="item.product.image" class="mobile-product-image" fit="cover" />
           <div class="item-details">
@@ -112,6 +145,16 @@ h2 {
 
 .delete-icon:hover {
   color: rgb(226, 6, 6);
+}
+
+.item-checkbox {
+  position: absolute;
+  top: 0.5px;
+  left: 5px;
+  z-index: 2;
+}
+.mobile-cart-item {
+  position: relative;
 }
 
 /* Mobile styles */

@@ -15,6 +15,9 @@ const dialogVisible = ref(props.visible)
 const router = useRouter()
 const isMobile = ref(window.innerWidth <= 768)
 
+const checkoutItems = ref(product.getSelectedCartItems.slice())
+const checkoutTotal = ref(product.getTotalSelectedCartItems)
+
 onMounted(() => {
   const checkIsMobile = () => {
     isMobile.value = window.innerWidth <= 768
@@ -25,6 +28,9 @@ onMounted(() => {
 })
 
 const handleClose = () => {
+  checkoutItems.value = product.getSelectedCartItems.slice()
+  checkoutTotal.value = product.getTotalSelectedCartItems
+
   product.checkout()
   router.push('/')
 }
@@ -72,14 +78,14 @@ watch(dialogVisible, (v) => emit('update:visible', v))
         <div class="order-section">
           <h3 class="section-title">ORDER SUMMARY</h3>
           <div class="order-summary">
-            <ReceiptComp />
+            <ReceiptComp :items="checkoutItems" />
           </div>
         </div>
 
         <div class="total-section">
           <div class="total-row">
             <span class="total-label">SUBTOTAL:</span>
-            <span class="total-amount">₱{{ product.subTotal.toLocaleString() }}</span>
+            <span class="total-amount">₱{{ checkoutTotal.toLocaleString() }}</span>
           </div>
           <div class="total-row shipping-fee">
             <span class="total-label">SHIPPING:</span>
@@ -87,7 +93,7 @@ watch(dialogVisible, (v) => emit('update:visible', v))
           </div>
           <div class="total-row grand-total">
             <span class="total-label">TOTAL:</span>
-            <span class="total-amount">₱{{ product.subTotal.toLocaleString() }}</span>
+            <span class="total-amount">₱{{ checkoutTotal.toLocaleString() }}</span>
           </div>
         </div>
       </div>

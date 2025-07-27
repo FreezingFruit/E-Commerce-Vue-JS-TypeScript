@@ -33,7 +33,10 @@ const form = reactive({
 })
 
 const submitCheckout = async () => {
+  const selectedItems = productStore.getSelectedCartItems
+
   if (!formRef.value) return
+  if (!selectedItems.length) return
 
   try {
     await formRef.value.validate()
@@ -51,6 +54,8 @@ const submitCheckout = async () => {
         country: form.country,
       },
     })
+    productStore.createReceipt()
+    productStore.checkout()
 
     showReceipt.value = true
     //no need for el message the checkout function handles it
@@ -174,7 +179,7 @@ watchEffect(() => {
 
             <el-button
               type="primary"
-              :disabled="!isFormComplete || !productStore.cartItems.length"
+              :disabled="!isFormComplete || !productStore.getSelectedCartItems.length"
               class="submit-button"
               size="large"
               native-type="submit"
@@ -189,11 +194,11 @@ watchEffect(() => {
       <div class="right">
         <div class="summary-container" :class="{ 'mobile-summary': isMobile }">
           <h2>ORDER SUMMARY</h2>
-          <div v-if="productStore.cartItems.length" class="summary-content">
+          <div v-if="productStore.getSelectedCartItems.length" class="summary-content">
             <ul class="summary-list">
               <el-divider />
               <li
-                v-for="item in productStore.cartItems"
+                v-for="item in productStore.getSelectedCartItems"
                 :key="item.product.id"
                 class="summary-item"
               >
@@ -208,7 +213,9 @@ watchEffect(() => {
           </div>
 
           <el-empty v-else description="NO ORDERS FOUND" />
-          <strong class="total">SUBTOTAL: ₱{{ productStore.subTotal.toLocaleString() }}</strong>
+          <strong class="total"
+            >SUBTOTAL: ₱{{ productStore.getTotalSelectedCartItems.toLocaleString() }}</strong
+          >
         </div>
       </div>
     </div>

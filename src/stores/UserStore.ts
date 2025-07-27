@@ -1,3 +1,5 @@
+import type { Cart } from '@/types/Cart'
+import type { PurchaseHistory } from '@/types/PurchaseHistory'
 import type { User } from '@/types/User'
 import { ElMessage } from 'element-plus'
 import { defineStore } from 'pinia'
@@ -6,6 +8,8 @@ export const useUserStore = defineStore('auth', {
   state: () => ({
     users: JSON.parse(localStorage.getItem('users') || '[]') as User[],
     currentUser: JSON.parse(localStorage.getItem('currentUser') || 'null') as User | null,
+    cart: [] as Cart[],
+    purchaseHistory: [] as PurchaseHistory[],
   }),
 
   getters: {

@@ -5,6 +5,10 @@ import { useRouter } from 'vue-router'
 
 const productStore = useProductStore()
 const router = useRouter()
+
+const handleCheckout = () => {
+  router.push('/checkout')
+}
 </script>
 
 <template>
@@ -21,14 +25,16 @@ const router = useRouter()
         <div class="summary">
           <h2>ORDER SUMMARY</h2>
           <el-divider />
-          <p class="summary-price">TOTAL: ₱{{ productStore.subTotal.toLocaleString() }}</p>
+          <p class="summary-price">
+            TOTAL: ₱{{ productStore.getTotalSelectedCartItems.toLocaleString() }}
+          </p>
           <el-divider />
           <el-button
-            :disabled="!productStore.cartItems.length"
+            :disabled="!productStore.getSelectedCartItems.length"
             class="checkoutBtn"
             type="primary"
             size="large"
-            @click="router.push('/checkout')"
+            @click="handleCheckout"
           >
             CHECK OUT
           </el-button>
