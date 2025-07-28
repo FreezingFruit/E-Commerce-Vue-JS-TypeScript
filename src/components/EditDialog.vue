@@ -8,20 +8,6 @@ const props = defineProps<{
   visible: boolean
 }>()
 
-const formRef = ref<FormInstance>()
-
-const emit = defineEmits(['update:visible'])
-const userStore = useUserStore()
-
-const dialogVisible = ref(props.visible)
-
-//needed watch to make the dialog appear
-watch(
-  () => props.visible,
-  (v) => (dialogVisible.value = v),
-)
-watch(dialogVisible, (v) => emit('update:visible', v))
-
 const form = reactive({
   firstName: '',
   lastName: '',
@@ -31,6 +17,33 @@ const form = reactive({
   country: '',
   postalCode: '',
 })
+
+const formRef = ref<FormInstance>()
+const emit = defineEmits(['update:visible'])
+const userStore = useUserStore()
+const dialogVisible = ref(props.visible)
+const isFormValid = ref(false)
+
+watch(
+  () => ({ ...form }),
+  async () => {
+    if (!formRef.value) return
+    try {
+      await formRef.value.validate()
+      isFormValid.value = true
+    } catch {
+      isFormValid.value = false
+    }
+  },
+  { deep: true },
+)
+
+//needed watch to make the dialog appear
+watch(
+  () => props.visible,
+  (v) => (dialogVisible.value = v),
+)
+watch(dialogVisible, (v) => emit('update:visible', v))
 
 const submit = async () => {
   if (!formRef.value) return
@@ -45,7 +58,7 @@ const submit = async () => {
       address: {
         street: form.street,
         city: form.city,
-        postalCode: Number(form.postalCode),
+        postalCode: form.postalCode,
         country: form.country,
       },
     })
@@ -61,11 +74,11 @@ watchEffect(() => {
   if (!user) return
   form.firstName = user.firstName || ''
   form.lastName = user.lastName || ''
-  form.phone = user.phone?.toString() || ''
+  form.phone = user.phone || ''
   form.street = user.address?.street || ''
   form.city = user.address?.city || ''
   form.country = user.address?.country || ''
-  form.postalCode = user.address?.postalCode?.toString() || ''
+  form.postalCode = user.address?.postalCode || ''
 })
 </script>
 
@@ -157,7 +170,12 @@ watchEffect(() => {
             </el-form-item>
           </div>
 
-          <el-button type="primary" class="submit-button" size="large" native-type="submit"
+          <el-button
+            :disabled="!isFormValid"
+            type="primary"
+            class="submit-button"
+            size="large"
+            native-type="submit"
             >Submit</el-button
           >
         </el-form>

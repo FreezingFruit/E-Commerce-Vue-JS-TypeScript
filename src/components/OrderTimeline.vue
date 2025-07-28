@@ -26,7 +26,10 @@ const nextStep = (orderId: number) => {
       :key="order.id"
       shadow="hover"
     >
-      <el-empty v-if="!userStore.currentUser?.purchaseHistory?.length" description="description" />
+      <el-empty
+        v-if="!userStore.currentUser?.purchaseHistory?.length"
+        description="NO ORDERS TO TRACK"
+      />
 
       <el-collapse accordion>
         <el-collapse-item :title="`Order #${order.id}`">

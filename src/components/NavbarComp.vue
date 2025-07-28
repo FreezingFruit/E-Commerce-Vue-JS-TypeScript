@@ -111,7 +111,8 @@ onMounted(() => {
           </span>
 
           <router-link to="/cart" class="cart-icon">
-            <el-icon size="large"><ShoppingCart /></el-icon>
+            <div class="counter">{{ userStore.currentUser?.cartItems?.length }}</div>
+            <el-icon class="cart" size="large"><ShoppingCart /></el-icon>
           </router-link>
         </div>
         <el-icon class="icon-menu" v-if="isMobile" @click="showDrawer = true"><Tools /></el-icon>
@@ -239,6 +240,14 @@ onMounted(() => {
   transition: all 0.2s ease;
   padding: 10px;
   border-radius: 8px;
+  text-decoration: none;
+}
+
+.counter {
+}
+
+.cart {
+  font-size: 50px;
 }
 
 .cart-icon:hover {

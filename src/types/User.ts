@@ -13,7 +13,7 @@ export interface User {
   address?: {
     street?: string
     city?: string
-    postalCode?: number
+    postalCode?: string
     country?: string
   }
 }

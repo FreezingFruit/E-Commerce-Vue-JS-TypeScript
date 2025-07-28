@@ -3,7 +3,7 @@ import { useProductStore } from '@/stores/ProductStore'
 import { useUserStore } from '@/stores/UserStore'
 import { onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import ReceiptComp from './ReceiptComp.vue'
+import ReceiptList from './ReceiptList.vue'
 
 const props = defineProps<{
   visible: boolean
@@ -78,7 +78,7 @@ watch(dialogVisible, (v) => emit('update:visible', v))
         <div class="order-section">
           <h3 class="section-title">ORDER SUMMARY</h3>
           <div class="order-summary">
-            <ReceiptComp :items="checkoutItems" />
+            <ReceiptList :items="checkoutItems" />
           </div>
         </div>
 

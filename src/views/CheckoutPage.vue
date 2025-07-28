@@ -50,7 +50,7 @@ const submitCheckout = async () => {
       address: {
         street: form.street,
         city: form.city,
-        postalCode: Number(form.postalCode) || 0,
+        postalCode: form.postalCode,
         country: form.country,
       },
     })

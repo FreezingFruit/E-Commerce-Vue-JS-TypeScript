@@ -60,7 +60,7 @@ const validatePostal = (fieldName: string) => {
 
 export const shippingDetailsRules: FormRules = {
   firstName: [
-    { required: true, message: 'Please enter your name', trigger: 'blur' },
+    { required: true, message: 'Please enter your first name', trigger: 'blur' },
     {
       validator: validateName('first name'),
       trigger: 'blur',
@@ -68,7 +68,7 @@ export const shippingDetailsRules: FormRules = {
   ],
 
   lastName: [
-    { required: true, message: 'Please enter your name', trigger: 'blur' },
+    { required: true, message: 'Please enter your last name', trigger: 'blur' },
     {
       validator: validateName('last name'),
       trigger: 'blur',

@@ -67,6 +67,8 @@ export const useProductStore = defineStore('product', {
       user.currentUser!.cartItems = user.currentUser!.cartItems?.filter(
         (ci) => ci.product.id !== id,
       )
+
+      user.persistUserChanges()
     },
 
     saveToStorage() {
