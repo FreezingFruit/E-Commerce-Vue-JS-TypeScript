@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/UserStore'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import { computed, reactive, ref } from 'vue'
+import ForgetPwDialog from '@/components/ForgetPwDialog.vue'
 
 const form = reactive({
   email: '',
