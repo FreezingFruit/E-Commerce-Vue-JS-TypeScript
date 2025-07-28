@@ -27,7 +27,7 @@ const dialogVisible = computed({
   set: (val) => emit('update:visible', val),
 })
 
-const formRules = ref<FormRules>(userFormRules(form.password, currentMode.value))
+const formRules = ref<FormRules>(userFormRules(form, currentMode.value))
 const validForm = computed(() =>
   currentMode.value === 'register'
     ? form.email && form.password.length >= 6 && form.password === form.confirmPassword
@@ -159,20 +159,20 @@ const submit = async () => {
             class="modern-input"
             show-password
           />
-          <p
-            v-if="currentMode === 'login'"
-            class="forgot-password-link"
-            @click="showForgetPassword = true"
-          >
-            Forgot password?
-          </p>
         </el-form-item>
+        <p
+          v-if="currentMode === 'login'"
+          class="forgot-password-link"
+          @click="showForgetPassword = true"
+        >
+          Forgot password?
+        </p>
 
         <el-form-item prop="confirmPassword" v-if="currentMode === 'register'" class="form-field">
           <label class="field-label">Confirm password</label>
           <el-input
             v-model="form.confirmPassword"
-            type="confirmPassword"
+            type=""
             placeholder="Confirm your password"
             class="modern-input"
             show-password
@@ -337,11 +337,11 @@ const submit = async () => {
 }
 
 .forgot-password-link {
-  margin-top: 6px;
+  margin-top: 20px;
   font-size: 13px;
   color: #409eff;
   cursor: pointer;
-  text-align: right;
+  text-align: left;
   transition: color 0.2s ease;
 }
 .forgot-password-link:hover {

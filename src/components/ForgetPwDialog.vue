@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { forgetFormRules } from '@/composables/ruleForgetPassword'
+import { getForgetFormRules } from '@/composables/ruleForgetPassword'
 import { useUserStore } from '@/stores/UserStore'
 import type { FormInstance } from 'element-plus'
 import { nextTick, reactive, ref, watch } from 'vue'
@@ -7,6 +7,7 @@ import { nextTick, reactive, ref, watch } from 'vue'
 const form = reactive({
   email: '',
   password: '',
+  confirmPassword: '',
 })
 
 const props = defineProps<{ visible: boolean }>()
@@ -14,6 +15,7 @@ const emit = defineEmits(['update:visible', 'success'])
 const dialogVisible = ref(props.visible)
 const formRef = ref<FormInstance | null>(null)
 const userStore = useUserStore()
+const forgetFormRules = getForgetFormRules(form)
 
 watch(
   () => props.visible,
@@ -26,6 +28,7 @@ watch(
     if (!v) {
       form.email = ''
       form.password = ''
+      form.confirmPassword = ''
       await nextTick()
       formRef.value?.clearValidate()
     }
@@ -83,6 +86,17 @@ const submit = async () => {
             v-model="form.password"
             type="password"
             placeholder="Enter new password"
+            class="modern-input"
+            show-password
+          />
+        </el-form-item>
+
+        <el-form-item prop="confirmPassword" class="form-field">
+          <label class="field-label">Confirm password</label>
+          <el-input
+            v-model="form.confirmPassword"
+            type="password"
+            placeholder="Confirm your password"
             class="modern-input"
             show-password
           />

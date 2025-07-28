@@ -30,7 +30,26 @@ const validatePassword = (fieldName: string) => {
   }
 }
 
-export const forgetFormRules: FormRules = {
+const validateConfirmPassword = (fieldName: string, getpassword: () => string) => {
+  return (_rule: unknown, value: string, callback: (error?: Error) => void) => {
+    const originalPassword = getpassword()
+
+    if (!value || value.trim() === '') {
+      return callback(new Error(`Please input ${fieldName}`))
+    }
+    if (!originalPassword || originalPassword.trim() === '') {
+      return callback()
+    }
+
+    if (value !== originalPassword) {
+      return callback(new Error('Passwords do not match'))
+    }
+
+    callback()
+  }
+}
+
+export const getForgetFormRules = (form: { password: string }): FormRules => ({
   email: [
     { required: true, message: 'Please enter your email', trigger: 'blur' },
     {
@@ -46,4 +65,12 @@ export const forgetFormRules: FormRules = {
       trigger: 'blur',
     },
   ],
-}
+
+  confirmPassword: [
+    { required: true, message: 'Please confirm your password', trigger: 'blur' },
+    {
+      validator: validateConfirmPassword('confirm password', () => form.password),
+      trigger: ['blur', 'change'],
+    },
+  ],
+})

@@ -1,10 +1,10 @@
 <script lang="ts" setup>
-import { userFormRules } from '@/composables/ruleForm'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/UserStore'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
-import { computed, reactive, ref } from 'vue'
+import { computed, nextTick, reactive, ref, watch } from 'vue'
 import ForgetPwDialog from '@/components/ForgetPwDialog.vue'
+import { signInPageFormRules } from '@/composables/ruleFormSignInPage'
 
 const form = reactive({
   email: '',
@@ -15,7 +15,7 @@ const router = useRouter()
 const userStore = useUserStore()
 const formRef = ref<FormInstance | null>(null)
 const currentMode = ref<'login' | 'register'>('login')
-const formRules = ref<FormRules>(userFormRules(form.password, currentMode.value))
+const formRules = ref<FormRules>(signInPageFormRules(form, currentMode.value) as FormRules)
 const showForgetPassword = ref(false)
 const validForm = computed(() =>
   currentMode.value === 'register'
@@ -52,6 +52,19 @@ const submit = async () => {
     }
   }
 }
+
+watch(currentMode, () => {
+  formRules.value = signInPageFormRules(form, currentMode.value) as FormRules
+})
+
+watch(currentMode, async () => {
+  form.email = ''
+  form.password = ''
+  form.confirmPassword = ''
+
+  await nextTick()
+  formRef.value?.clearValidate()
+})
 </script>
 
 <template>
@@ -93,14 +106,14 @@ const submit = async () => {
             class="modern-input"
             show-password
           />
-          <p
-            v-if="currentMode === 'login'"
-            class="forgot-password-link"
-            @click="showForgetPassword = true"
-          >
-            Forgot password?
-          </p>
         </el-form-item>
+        <p
+          v-if="currentMode === 'login'"
+          class="forgot-password-link"
+          @click="showForgetPassword = true"
+        >
+          Forgot password?
+        </p>
 
         <el-form-item prop="confirmPassword" v-if="currentMode === 'register'" class="form-field">
           <label class="field-label">Confirm password</label>
@@ -266,11 +279,11 @@ const submit = async () => {
 }
 
 .forgot-password-link {
-  margin-top: 6px;
+  margin-top: 25px;
   font-size: 13px;
   color: #409eff;
   cursor: pointer;
-  text-align: right;
+  text-align: left;
   transition: color 0.2s ease;
 }
 .forgot-password-link:hover {
