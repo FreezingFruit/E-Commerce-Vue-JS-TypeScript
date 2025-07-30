@@ -243,9 +243,6 @@ onMounted(() => {
   text-decoration: none;
 }
 
-.counter {
-}
-
 .cart {
   font-size: 50px;
 }
@@ -254,6 +251,23 @@ onMounted(() => {
   color: #409eff;
   background-color: rgba(64, 158, 255, 0.06);
   transform: translateY(-1px);
+}
+
+.cart-icon::after {
+  content: '';
+  position: absolute;
+  left: 12px;
+  bottom: 6px;
+  width: calc(100% - 23px);
+  height: 2px;
+  background-color: #409eff;
+  transform: scale(0);
+  transform-origin: left;
+  transition: all 0.3s ease;
+}
+
+.cart-icon:hover::after {
+  transform: scaleX(1);
 }
 
 .icon-menu {

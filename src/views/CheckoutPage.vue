@@ -6,6 +6,7 @@ import { computed, onMounted, reactive, ref, watchEffect } from 'vue'
 
 import ReceiptDialog from '@/components/ReceiptDialog.vue'
 import { shippingDetailsRules } from '@/composables/ruleFormShipping'
+import { Methods, type Method } from '@/utils/PaymentMethods'
 
 const userStore = useUserStore()
 const formRef = ref<FormInstance>()
@@ -13,6 +14,8 @@ const productStore = useProductStore()
 const showReceipt = ref(false)
 const loading = ref(false)
 const isMobile = ref(window.innerWidth <= 768)
+const selectedMethod = ref<Method | ''>('')
+const paymentMethods = Methods
 
 onMounted(() => {
   const checkIfMobile = () => {
@@ -88,6 +91,12 @@ watchEffect(() => {
   form.country = user.address?.country || ''
   form.postalCode = user.address?.postalCode?.toString() || ''
 })
+
+//method function
+
+const selectMethod = (selectMethod: Method) => {
+  selectedMethod.value = selectMethod
+}
 </script>
 
 <template>
@@ -179,7 +188,9 @@ watchEffect(() => {
 
             <el-button
               type="primary"
-              :disabled="!isFormComplete || !productStore.getSelectedCartItems.length"
+              :disabled="
+                !isFormComplete || !productStore.getSelectedCartItems.length || !selectedMethod
+              "
               class="submit-button"
               size="large"
               native-type="submit"
@@ -191,6 +202,8 @@ watchEffect(() => {
           </el-form>
         </div>
       </div>
+
+      <!--RIGHT SIDE OF SCREEN-->
       <div class="right">
         <div class="summary-container" :class="{ 'mobile-summary': isMobile }">
           <h2>ORDER SUMMARY</h2>
@@ -217,6 +230,21 @@ watchEffect(() => {
             >SUBTOTAL: ₱{{ productStore.getTotalSelectedCartItems.toLocaleString() }}</strong
           >
         </div>
+
+        <div class="payment-container">
+          <h2>PAYMENT METHODS</h2>
+          <div class="payment-methods">
+            <el-button
+              v-for="(method, index) in paymentMethods"
+              :key="index"
+              @click="selectMethod(method)"
+              :type="selectedMethod === method ? 'primary' : 'default'"
+              class="method-btn"
+            >
+              {{ method }}
+            </el-button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -237,8 +265,8 @@ watchEffect(() => {
 .right {
   background: #fafafa;
   display: flex;
+  flex-direction: column;
   align-items: flex-start;
-  justify-content: center;
   padding: 48px 32px;
 }
 
@@ -340,6 +368,85 @@ watchEffect(() => {
   text-align: right;
   font-size: 24px;
   margin: auto 10px;
+}
+
+.payment-container {
+  margin-top: 10px;
+  background-color: transparent;
+  color: black;
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
+  align-items: center;
+  min-width: 300px;
+  max-width: 600px;
+  width: 100%;
+  height: 300px;
+  border: solid 1px;
+  box-shadow: 5px 5px 8px gray;
+}
+
+.payment-container h2 {
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  margin: 20px 0;
+}
+
+.payment-methods {
+  display: flex;
+  justify-content: space-evenly;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-top: 10px;
+  overflow-y: auto;
+}
+
+.method-btn {
+  position: relative;
+  margin-left: 0 !important;
+  overflow: hidden;
+  width: 170px;
+  height: 52px;
+  background-color: white;
+  color: black;
+  border: 1px solid black;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: transform color 0.3s ease;
+  z-index: 1;
+}
+
+.method-btn::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: black;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+  z-index: -1;
+}
+
+.method-btn:hover::after {
+  transform: scaleX(1);
+}
+
+.method-btn:hover {
+  color: white;
+  background-color: white;
+  border: 1px solid black;
+  transform: scale(1.1);
+}
+
+.method-btn:focus {
+  color: white;
+  background-color: black;
+  border: none;
+  transform: scale(1.1);
 }
 
 @media (max-width: 768px) {

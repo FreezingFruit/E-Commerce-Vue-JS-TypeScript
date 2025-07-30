@@ -146,6 +146,16 @@ h1 {
 .delete-btn {
   padding: 10px 20px;
   margin-bottom: 10px;
+  color: black;
+  background-color: white;
+  transition: all 0.3s ease;
+}
+
+.delete-btn:hover {
+  background-color: black;
+  transform: scale(1.1);
+  color: white;
+  border: none;
 }
 
 @media (max-width: 768px) {

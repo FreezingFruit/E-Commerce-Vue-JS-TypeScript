@@ -166,7 +166,6 @@ const showEdit = ref(false)
   transform: translateY(0);
 }
 
-/* Responsive tweaks if the card is used alone on mobile */
 @media (max-width: 768px) {
   .user-information {
     padding: 24px;

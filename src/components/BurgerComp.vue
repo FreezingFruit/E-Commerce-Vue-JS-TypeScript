@@ -76,6 +76,7 @@ const logout = () => {
         </span>
 
         <router-link to="/cart" class="cart-icon">
+          {{ userStore.currentUser?.cartItems?.length }}
           <el-icon size="large"><ShoppingCart /></el-icon>
         </router-link>
       </div>
