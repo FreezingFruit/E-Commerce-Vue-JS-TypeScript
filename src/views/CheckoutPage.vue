@@ -92,7 +92,7 @@ watchEffect(() => {
   form.postalCode = user.address?.postalCode?.toString() || ''
 })
 
-//method function
+//payment method function
 
 const selectMethod = (selectMethod: Method) => {
   selectedMethod.value = selectMethod
@@ -406,7 +406,7 @@ const selectMethod = (selectMethod: Method) => {
   position: relative;
   margin-left: 0 !important;
   overflow: hidden;
-  width: 170px;
+  width: 150px;
   height: 52px;
   background-color: white;
   color: black;
@@ -420,8 +420,6 @@ const selectMethod = (selectMethod: Method) => {
 .method-btn::after {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
   width: 100%;
   height: 100%;
   background-color: black;
@@ -439,14 +437,12 @@ const selectMethod = (selectMethod: Method) => {
   color: white;
   background-color: white;
   border: 1px solid black;
-  transform: scale(1.1);
 }
 
 .method-btn:focus {
   color: white;
   background-color: black;
   border: none;
-  transform: scale(1.1);
 }
 
 @media (max-width: 768px) {
