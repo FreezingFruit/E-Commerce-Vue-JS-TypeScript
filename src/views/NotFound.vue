@@ -1,18 +1,3 @@
-<template>
-  <div class="video-wrapper">
-    <video autoplay muted loop playsinline class="background-video">
-      <source src="/404NotFoundBg.mp4" type="video/mp4" />
-    </video>
-    <div class="page-body">
-      <h1>404 NOT FOUND HAHAHAHAHHHA</h1>
-
-      <div ref="trollLink" class="router-wrapper" @mouseover="runAway">
-        <router-link class="router" to="/"> Go back </router-link>
-      </div>
-    </div>
-  </div>
-</template>
-
 <script lang="ts" setup>
 import { ref, nextTick } from 'vue'
 
@@ -51,6 +36,21 @@ const runAway = async () => {
   }, 500)
 }
 </script>
+
+<template>
+  <div class="video-wrapper">
+    <video autoplay muted loop playsinline class="background-video">
+      <source src="/404NotFoundBg.mp4" type="video/mp4" />
+    </video>
+    <div class="page-body">
+      <h1>404 NOT FOUND HAHAHAHAHHHA</h1>
+
+      <div ref="trollLink" class="router-wrapper" @mouseover="runAway">
+        <router-link class="router" to="/"> Go back </router-link>
+      </div>
+    </div>
+  </div>
+</template>
 
 <style scoped>
 .video-wrapper {

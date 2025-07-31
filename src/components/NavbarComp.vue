@@ -8,7 +8,7 @@ import AuthDialog from './AuthDialog.vue'
 import { useUiStore } from '@/stores/UiStore'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import BurgerComp from './BurgerComp.vue'
+import MenuDrawer from './MenuDrawer.vue'
 
 const userStore = useUserStore()
 const productStore = useProductStore()
@@ -116,7 +116,7 @@ onMounted(() => {
           </router-link>
         </div>
         <el-icon class="icon-menu" v-if="isMobile" @click="showDrawer = true"><Tools /></el-icon>
-        <BurgerComp v-model:visible="showDrawer" />
+        <MenuDrawer v-model:visible="showDrawer" />
       </div>
     </el-header>
   </section>

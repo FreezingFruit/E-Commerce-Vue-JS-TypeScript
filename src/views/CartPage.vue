@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import CartComp from '@/components/CartComp.vue'
+import CartList from '@/components/CartList.vue'
 import { useProductStore } from '@/stores/ProductStore'
 import { useRouter } from 'vue-router'
 
@@ -20,7 +20,7 @@ const handleCheckout = () => {
       </h1>
 
       <div class="cart-main">
-        <CartComp />
+        <CartList />
 
         <div class="summary">
           <h2>ORDER SUMMARY</h2>
