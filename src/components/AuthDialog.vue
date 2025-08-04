@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { reactive, computed, ref, watch, nextTick } from 'vue'
-import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
+import { ElMessage, type FormInstance } from 'element-plus'
 import { useUserStore } from '@/stores/UserStore'
 import { useUiStore } from '@/stores/UiStore'
 import { userFormRules } from '@/composables/ruleForm'
@@ -27,7 +27,8 @@ const dialogVisible = computed({
   set: (val) => emit('update:visible', val),
 })
 
-const formRules = ref<FormRules>(userFormRules(form, currentMode.value))
+const formRules = computed(() => userFormRules(form, currentMode.value))
+
 const validForm = computed(() =>
   currentMode.value === 'register'
     ? form.email && form.password.length >= 6 && form.password === form.confirmPassword
@@ -172,7 +173,7 @@ const submit = async () => {
           <label class="field-label">Confirm password</label>
           <el-input
             v-model="form.confirmPassword"
-            type=""
+            type="password"
             placeholder="Confirm your password"
             class="modern-input"
             show-password

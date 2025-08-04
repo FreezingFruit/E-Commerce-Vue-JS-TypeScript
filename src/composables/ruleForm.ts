@@ -1,8 +1,8 @@
 import type { FormRules } from 'element-plus'
 
 const emailPattern = /^[\w\-\.]+@([\w-]+\.)+[\w-]{2,}$/
-// const passwordPattern =
-//   /^(?=.*[A-ZÑ])(?=.*[a-zñ])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])[A-Za-zÑñ\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]{8,}$/
+const passwordPattern =
+  /^(?=.*[A-ZÑ])(?=.*[a-zñ])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])[A-Za-zÑñ\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]{8,}$/
 
 //VALIDATOR FUNCTIONS
 const validateEmail = (fieldName: string) => {
@@ -62,11 +62,8 @@ export const userFormRules = (form: { password: string }, currentMode: string): 
       ? [
           { required: true, message: 'Please enter your password', trigger: 'blur' },
           {
-            validator: (_, value, callback) => {
-              const passwordPattern =
-                /^(?=.*[A-ZÑ])(?=.*[a-zñ])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])[A-Za-zÑñ\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]{8,}$/
-
-              if (!passwordPattern.test(value || '')) {
+            validator: (rule, value, callback) => {
+              if (!value || !passwordPattern.test(value)) {
                 callback(new Error('Minimum of 8 characters, 1 uppercase, 1 special character'))
               } else {
                 callback()
