@@ -5,6 +5,7 @@ import { useUserStore } from '@/stores/UserStore'
 import { useUiStore } from '@/stores/UiStore'
 import { userFormRules } from '@/composables/ruleForm'
 import ForgetPwDialog from './ForgetPwDialog.vue'
+import { useRouter } from 'vue-router'
 
 const props = defineProps<{
   visible: boolean
@@ -18,6 +19,7 @@ const form = reactive({
 })
 
 const emit = defineEmits(['update:visible', 'success'])
+const router = useRouter()
 const formRef = ref<FormInstance | null>(null)
 const userStore = useUserStore()
 const uiStore = useUiStore()
@@ -102,9 +104,19 @@ const submit = async () => {
       ElMessage.success('Logged in!')
     }
 
-    await uiStore.handleSuccessfulLogin()
+    uiStore.hideLoginDialog() // ✅ just hides dialog
+
     emit('success')
     emit('update:visible', false)
+
+    const intendedRoute = sessionStorage.getItem('intendedRoute')
+    if (intendedRoute) {
+      sessionStorage.removeItem('intendedRoute')
+      await router.push(intendedRoute)
+    } else {
+      await router.push('/') // fallback
+    }
+    router.push('/')
   } catch (err: unknown) {
     if (err instanceof Error) {
       const msg = err instanceof Error ? err.message : 'Something went wrong!'
