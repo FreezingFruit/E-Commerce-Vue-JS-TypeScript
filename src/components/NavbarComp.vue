@@ -31,7 +31,7 @@ const showRegister = ref(false)
       <div class="navbar-container">
         <router-link to="/" class="dashboard-link">
           <div class="logo">
-            <h1>DIGISHOP</h1>
+            <h1>MYSHOP</h1>
           </div>
         </router-link>
 
