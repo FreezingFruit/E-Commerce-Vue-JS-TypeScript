@@ -1,43 +1,82 @@
 <script lang="ts" setup>
-import router from '@/routes'
-import { useAuthStore } from '@/stores/AuthStore'
+import { useUserStore } from '@/stores/UserStore'
 import { useProductStore } from '@/stores/ProductStore'
 import type { Product } from '@/types/Product'
 import { ShoppingCart } from '@element-plus/icons-vue'
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import AuthDialog from './AuthDialog.vue'
+import { useUiStore } from '@/stores/UiStore'
+import { useRouter } from 'vue-router'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import MenuDrawer from './MenuDrawer.vue'
 
-const authStore = useAuthStore()
+const userStore = useUserStore()
 const productStore = useProductStore()
+const uiStore = useUiStore()
 const searchText = ref('')
-const querySearchAsync = (queryString: string, cb: (results: Product[]) => void) => {
+const router = useRouter()
+const showLogin = ref(false)
+const showRegister = ref(false)
+const isMobile = ref(window.innerWidth <= 768)
+const showDrawer = ref(false)
+
+const querySearchAsync = (queryString: string, callback: (results: Product[]) => void) => {
+  if (!queryString || queryString.trim().length < 1) {
+    callback([])
+    return
+  }
+
   const results = productStore.products.filter((product) =>
     product.name.toLowerCase().includes(queryString.toLowerCase()),
   )
-  cb(results)
+  callback(results)
 }
 
 const handleSelect = (item: { name: string }) => {
   router.push(`/product/${encodeURIComponent(item.name)}`)
 }
 
-const showLogin = ref(false)
-const showRegister = ref(false)
+const logout = () => {
+  ElMessageBox.confirm('Are you sure you want to logout?', 'Confirm Logout', {
+    confirmButtonText: 'Yes, log out',
+    cancelButtonText: 'No',
+    type: 'warning',
+  })
+    .then(() => {
+      ElMessage.success('Logout successful')
+      userStore.logout()
+      router.push('/')
+    })
+    .catch(() => {})
+}
+
+onMounted(() => {
+  const checkScreenSize = () => {
+    isMobile.value = window.innerWidth < 768
+  }
+
+  checkScreenSize()
+  window.addEventListener('resize', checkScreenSize)
+})
 </script>
 
 <template>
   <section id="navbar">
     <el-header class="navbar">
       <div class="navbar-container">
-        <router-link to="/" class="dashboard-link">
+        <router-link v-if="!isMobile" to="/" class="dashboard-link">
           <div class="logo">
             <h1>MYSHOP</h1>
           </div>
         </router-link>
 
+        <el-icon v-if="isMobile" class="back-btn" @click="router.back()"><DArrowLeft /></el-icon>
+
         <el-autocomplete
           v-model="searchText"
           :fetch-suggestions="querySearchAsync"
+          :trigger-on-focus="false"
+          :debounce="300"
           placeholder="Search for a product..."
           @select="handleSelect"
           value-key="name"
@@ -46,37 +85,52 @@ const showRegister = ref(false)
           clearable
         />
 
-        <div class="nav-links">
+        <div class="nav-links" v-if="!isMobile">
           <router-link to="/product" class="product-link">
             <h3>PRODUCTS</h3>
           </router-link>
 
-          <span v-if="!authStore.currentUser" class="product-link" @click="showLogin = true">
+          <span v-if="!userStore.currentUser" class="product-link" @click="showLogin = true">
             <h3>LOGIN</h3>
           </span>
-          <span v-if="!authStore.currentUser" class="product-link" @click="showRegister = true">
+          <span v-if="!userStore.currentUser" class="product-link" @click="showRegister = true">
             <h3>REGISTER</h3>
           </span>
           <AuthDialog v-model:visible="showLogin" mode="login" />
           <AuthDialog v-model:visible="showRegister" mode="register" />
+          <AuthDialog
+            v-model:visible="uiStore.loginDialogVisible"
+            :mode="uiStore.loginDialogMode"
+          />
 
-          <router-link v-if="authStore.currentUser" to="/profile" class="product-link">
+          <router-link v-if="userStore.currentUser" to="/profile" class="product-link">
             <h3>PROFILE</h3>
           </router-link>
-          <span v-if="authStore.currentUser" class="product-link" @click="authStore.logout">
+          <span v-if="userStore.currentUser" class="product-link" @click="logout">
             <h3>LOGOUT</h3>
           </span>
 
           <router-link to="/cart" class="cart-icon">
-            <el-icon size="large"><ShoppingCart /></el-icon>
+            <div class="counter">{{ userStore.currentUser?.cartItems?.length }}</div>
+            <el-icon class="cart" size="large"><ShoppingCart /></el-icon>
           </router-link>
         </div>
+        <el-icon class="icon-menu" v-if="isMobile" @click="showDrawer = true"><Tools /></el-icon>
+        <MenuDrawer v-model:visible="showDrawer" />
       </div>
     </el-header>
   </section>
 </template>
 
 <style lang="css" scoped>
+:deep(.el-drawer) {
+  border-left: 1px solid black;
+}
+
+:deep(.el-drawer__body) {
+  padding: 0;
+}
+
 .navbar {
   background-color: #ffffff;
   border-bottom: 1px solid #e0e0e0;
@@ -127,7 +181,6 @@ const showRegister = ref(false)
   box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
 }
 
-/* NAV LINKS */
 .nav-links {
   display: flex;
   align-items: center;
@@ -179,7 +232,6 @@ const showRegister = ref(false)
   cursor: pointer;
 }
 
-/* CART ICON */
 .cart-icon {
   display: inline-flex;
   align-items: center;
@@ -188,11 +240,61 @@ const showRegister = ref(false)
   transition: all 0.2s ease;
   padding: 10px;
   border-radius: 8px;
+  text-decoration: none;
+}
+
+.cart {
+  font-size: 50px;
 }
 
 .cart-icon:hover {
   color: #409eff;
   background-color: rgba(64, 158, 255, 0.06);
   transform: translateY(-1px);
+}
+
+.cart-icon::after {
+  content: '';
+  position: absolute;
+  left: 12px;
+  bottom: 6px;
+  width: calc(100% - 23px);
+  height: 2px;
+  background-color: #409eff;
+  transform: scale(0);
+  transform-origin: left;
+  transition: all 0.3s ease;
+}
+
+.cart-icon:hover::after {
+  transform: scaleX(1);
+}
+
+.icon-menu {
+  cursor: pointer;
+  transition: all 0.2s ease-out;
+  border-radius: 10px;
+  font-size: 23px;
+}
+
+.icon-menu:hover {
+  background-color: black;
+  color: white;
+  transform: rotate(180deg);
+}
+
+.back-btn {
+  font-size: 25px;
+
+  transition: all 0.3s ease;
+}
+
+.back-btn:hover {
+  transform: scale(1.2);
+  border-radius: 20px;
+  background-color: black;
+  border-color: white;
+  color: white;
+  padding-right: 5px;
 }
 </style>

@@ -1,32 +1,40 @@
 <script lang="ts" setup>
-import CartComp from '@/components/CartComp.vue'
+import CartList from '@/components/CartList.vue'
 import { useProductStore } from '@/stores/ProductStore'
+import { useRouter } from 'vue-router'
 
 const productStore = useProductStore()
+const router = useRouter()
+
+const handleCheckout = () => {
+  router.push('/checkout')
+}
 </script>
 
 <template>
   <section id="cart" class="page-container">
     <div class="cart-content">
       <h1>
-        - - - YOUR CART {{ productStore.totalProducts }}
-        {{ productStore.totalProducts == 1 ? 'ITEM' : 'ITEMS' }} - - -
+        YOUR CART HAS {{ productStore.totalProducts }}
+        {{ productStore.totalProducts == 1 ? 'ITEM' : 'ITEMS' }}
       </h1>
 
       <div class="cart-main">
-        <CartComp />
+        <CartList />
 
         <div class="summary">
           <h2>ORDER SUMMARY</h2>
           <el-divider />
-          <p class="summary-price">TOTAL: ₱{{ productStore.subTotal.toLocaleString() }}</p>
+          <p class="summary-price">
+            TOTAL: ₱{{ productStore.getTotalSelectedCartItems.toLocaleString() }}
+          </p>
           <el-divider />
           <el-button
-            :disabled="!productStore.cartItems.length"
+            :disabled="!productStore.getSelectedCartItems.length"
             class="checkoutBtn"
             type="primary"
             size="large"
-            @click="productStore.checkout"
+            @click="handleCheckout"
           >
             CHECK OUT
           </el-button>

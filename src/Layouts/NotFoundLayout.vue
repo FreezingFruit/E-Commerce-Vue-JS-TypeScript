@@ -1,5 +1,5 @@
 <script lang="ts" setup></script>
 
 <template>
-  <section id="sidebar"></section>
+  <main><slot></slot></main>
 </template>

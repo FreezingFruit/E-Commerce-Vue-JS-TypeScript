@@ -1,5 +1,24 @@
 <script lang="ts" setup>
+import { useProductStore } from '@/stores/ProductStore'
+import { useUserStore } from '@/stores/UserStore'
 import type { Product } from '@/types/Product'
+import { ElMessage } from 'element-plus'
+import { useRouter } from 'vue-router'
+
+const productStore = useProductStore()
+const userStore = useUserStore()
+const router = useRouter()
+
+const handleAddToCart = (product: Product) => {
+  if (!userStore.currentUser) {
+    router.push('/signin')
+    ElMessage.warning('You must be logged in to access this feature')
+
+    return
+  }
+
+  productStore.addToCart(product, 1)
+}
 
 defineProps<{
   products: Product[]
@@ -11,14 +30,19 @@ defineProps<{
     <div v-if="products.length">
       <div class="product-grid">
         <div v-for="(product, index) in products" :key="index" class="card-link">
-          <router-link :to="`/product/${encodeURIComponent(product.name)}`">
-            <el-card class="product-card" shadow="hover">
+          <el-card class="product-card" shadow="hover">
+            <router-link :to="`/product/${encodeURIComponent(product.name)}`">
               <img :src="product.image" class="product-image" />
               <div class="product-info">{{ product.name }}</div>
               <div class="product-description">{{ product.description }}</div>
+            </router-link>
+            <div class="card-buttom">
               <div class="product-info-price">₱{{ product.price.toLocaleString() }}</div>
-            </el-card>
-          </router-link>
+              <el-button class="addToCart-btn" @click.stop="handleAddToCart(product)">
+                <el-icon><ShoppingBag /></el-icon
+              ></el-button>
+            </div>
+          </el-card>
         </div>
       </div>
     </div>
@@ -110,5 +134,26 @@ defineProps<{
   text-decoration: none;
   color: inherit;
   display: inline-block;
+}
+
+.card-buttom {
+  display: flex;
+  justify-content: space-between;
+}
+
+.addToCart-btn {
+  position: relative;
+  font-size: 17px;
+  cursor: pointer;
+
+  padding: 10px 7px;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.addToCart-btn:hover {
+  background-color: black;
+  color: white;
+  border-radius: 20px;
 }
 </style>

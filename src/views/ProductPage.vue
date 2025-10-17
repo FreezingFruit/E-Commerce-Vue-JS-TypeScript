@@ -7,7 +7,7 @@ const productStore = useProductStore()
 <template>
   <section id="product" class="page-container">
     <div class="product-container">
-      <span><h2>- - - PRODUCTS - - -</h2></span>
+      <span><h2>PRODUCTS</h2></span>
       <ProductCard :products="productStore.products" />
     </div>
   </section>

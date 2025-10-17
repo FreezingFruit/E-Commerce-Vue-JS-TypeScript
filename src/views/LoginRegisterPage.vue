@@ -1,86 +1,26 @@
-<script setup lang="ts">
-import { reactive, computed, ref, watch, nextTick } from 'vue'
-import { ElMessage, type FormInstance } from 'element-plus'
-import { useUserStore } from '@/stores/UserStore'
-import { useUiStore } from '@/stores/UiStore'
-import { userFormRules } from '@/composables/ruleForm'
-import ForgetPwDialog from './ForgetPwDialog.vue'
+<script lang="ts" setup>
 import { useRouter } from 'vue-router'
-
-const props = defineProps<{
-  visible: boolean
-  mode: 'login' | 'register'
-}>()
+import { useUserStore } from '@/stores/UserStore'
+import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
+import { computed, nextTick, reactive, ref, watch } from 'vue'
+import ForgetPwDialog from '@/components/ForgetPwDialog.vue'
+import { signInPageFormRules } from '@/composables/ruleFormSignInPage'
 
 const form = reactive({
   email: '',
   password: '',
   confirmPassword: '',
 })
-
-const emit = defineEmits(['update:visible', 'success'])
 const router = useRouter()
-const formRef = ref<FormInstance | null>(null)
 const userStore = useUserStore()
-const uiStore = useUiStore()
-const currentMode = ref(props.mode)
-const dialogVisible = computed({
-  get: () => props.visible,
-  set: (val) => emit('update:visible', val),
-})
-
-const formRules = computed(() => userFormRules(form, currentMode.value))
-
+const formRef = ref<FormInstance | null>(null)
+const currentMode = ref<'login' | 'register'>('login')
+const formRules = ref<FormRules>(signInPageFormRules(form, currentMode.value) as FormRules)
+const showForgetPassword = ref(false)
 const validForm = computed(() =>
   currentMode.value === 'register'
     ? form.email && form.password.length >= 6 && form.password === form.confirmPassword
     : form.email && form.password,
-)
-const showForgetPassword = ref(false)
-
-watch(dialogVisible, (v) => {
-  if (v) currentMode.value = props.mode
-  emit('update:visible', v)
-})
-
-//for swapping modes
-watch(
-  () => props.mode,
-  async (v) => {
-    currentMode.value = v
-
-    form.email = ''
-    form.password = ''
-    form.confirmPassword = ''
-
-    await nextTick()
-    formRef.value?.clearValidate()
-  },
-)
-
-//clear on swap
-watch(currentMode, async () => {
-  form.email = ''
-  form.password = ''
-  form.confirmPassword = ''
-
-  await nextTick()
-  formRef.value?.clearValidate()
-})
-
-//clear on exit dialog
-watch(
-  () => props.visible,
-  async (v) => {
-    if (!v) {
-      form.email = ''
-      form.password = ''
-      form.confirmPassword = ''
-
-      await nextTick()
-      formRef.value?.clearValidate()
-    }
-  },
 )
 
 const submit = async () => {
@@ -99,24 +39,12 @@ const submit = async () => {
         address: {},
       })
       ElMessage.success('Registered!')
+      router.push('/')
     } else {
       userStore.login(form.email, form.password)
       ElMessage.success('Logged in!')
+      router.push('/')
     }
-
-    uiStore.hideLoginDialog() // ✅ just hides dialog
-
-    emit('success')
-    emit('update:visible', false)
-
-    const intendedRoute = sessionStorage.getItem('intendedRoute')
-    if (intendedRoute) {
-      sessionStorage.removeItem('intendedRoute')
-      await router.push(intendedRoute)
-    } else {
-      await router.push('/') // fallback
-    }
-    router.push('/')
   } catch (err: unknown) {
     if (err instanceof Error) {
       const msg = err instanceof Error ? err.message : 'Something went wrong!'
@@ -124,16 +52,23 @@ const submit = async () => {
     }
   }
 }
+
+watch(currentMode, () => {
+  formRules.value = signInPageFormRules(form, currentMode.value) as FormRules
+})
+
+watch(currentMode, async () => {
+  form.email = ''
+  form.password = ''
+  form.confirmPassword = ''
+
+  await nextTick()
+  formRef.value?.clearValidate()
+})
 </script>
 
 <template>
-  <el-dialog
-    v-model="dialogVisible"
-    :title="currentMode === 'login' ? 'Login' : 'Register'"
-    width="580px"
-    align-center
-    class="modern-dialog"
-  >
+  <section id="signin">
     <div class="form-container">
       <div class="form-header">
         <h2 class="form-title">
@@ -143,7 +78,6 @@ const submit = async () => {
           {{ currentMode === 'login' ? 'Sign in to your account' : 'Join us today' }}
         </p>
       </div>
-
       <el-form
         @submit.prevent="submit"
         class="modern-form"
@@ -185,7 +119,7 @@ const submit = async () => {
           <label class="field-label">Confirm password</label>
           <el-input
             v-model="form.confirmPassword"
-            type="password"
+            type="confirmPassword"
             placeholder="Confirm your password"
             class="modern-input"
             show-password
@@ -213,32 +147,27 @@ const submit = async () => {
       </el-button>
       <ForgetPwDialog v-model:visible="showForgetPassword" />
     </div>
-  </el-dialog>
+  </section>
 </template>
 
-<style>
-:deep(.el-button) {
-  margin-left: 0 !important;
+<style lang="css" scoped>
+#signin {
+  min-height: 100vh;
 }
-
-.modern-dialog .el-dialog {
-  border-radius: 16px;
-  box-shadow:
-    0 20px 25px -5px rgba(0, 0, 0, 0.1),
-    0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  border: 1px solid #f0f0f0;
-}
-
-.modern-dialog .el-dialog__header {
-  display: none;
-}
-
-.modern-dialog .el-dialog__body {
-  padding: 0;
-}
-
 .form-container {
-  padding: 48px 32px 32px;
+  display: flex;
+  flex-direction: column;
+  margin: 50px auto;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  max-width: 55rem;
+
+  border: 1px solid inherit;
+  border-radius: 10px;
+  box-shadow:
+    0 4px 8px 0 rgba(0, 0, 0, 0.2),
+    0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
 .form-header {
@@ -324,7 +253,7 @@ const submit = async () => {
 }
 
 .submit-button.is-disabled {
-  background-color: #f5f5f5;
+  background-color: rgba(128, 128, 128, 0.459);
   color: #999;
   cursor: not-allowed;
 }
@@ -350,7 +279,7 @@ const submit = async () => {
 }
 
 .forgot-password-link {
-  margin-top: 20px;
+  margin-top: 25px;
   font-size: 13px;
   color: #409eff;
   cursor: pointer;
@@ -361,17 +290,18 @@ const submit = async () => {
   color: #66b1ff;
 }
 
-@media (max-width: 480px) {
-  .modern-dialog .el-dialog {
-    width: 100% !important;
-    margin: 0 auto;
-  }
+@media (max-width: 768px) {
   .form-container {
-    padding: 32px 24px 24px;
+    padding: 24px 16px;
+    margin: 30px 16px;
   }
 
   .form-title {
     font-size: 20px;
+  }
+
+  .form-subtitle {
+    font-size: 13px;
   }
 }
 </style>
